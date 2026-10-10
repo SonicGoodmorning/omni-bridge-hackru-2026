@@ -1,209 +1,94 @@
 /**
- * Re-record the silent, captioned sample walkthrough.
- * Start the production app first: npm run build && npm run start -- --port 3001
- * Run: PLAYWRIGHT_BROWSERS_PATH=/private/tmp/omni-playwright node scripts/record-demo.mjs
- * Optional: DEMO_URL and PLAYWRIGHT_CHROME_PATH override the local defaults.
- * Add --screenshots-only to refresh the stills without recording another video.
- * This uses the actual prepared-sample UI; it never simulates live Gemini or speech.
+ * Record the connected workflow using real Live Gemini by default.
+ * Start production first: npm run build && npm run start -- --port 3003
+ * DEMO_URL and PLAYWRIGHT_CHROME_PATH may override local defaults.
+ * --sample records only explicitly labeled fixtures; --screenshots-only skips video.
+ * Recording captions are overlays; application responses are never mocked.
  */
-import { mkdir, mkdtemp, rename, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import path from "node:path";
-
-process.env.PLAYWRIGHT_BROWSERS_PATH ||= "/private/tmp/omni-playwright";
-const { chromium } = await import("@playwright/test");
-const baseURL = process.env.DEMO_URL || "http://127.0.0.1:3001";
-const chromePath = process.env.PLAYWRIGHT_CHROME_PATH || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-const screenshotsOnly = process.argv.includes("--screenshots-only");
-const output = path.resolve("docs");
-const screenshots = path.join(output, "screenshots");
-const temporaryVideo = await mkdtemp(path.join(tmpdir(), "omni-bridge-recording-"));
-await mkdir(screenshots, { recursive: true });
-
-const browser = await chromium.launch({ executablePath: chromePath, headless: true });
-const context = await browser.newContext({
-  viewport: { width: 1440, height: 960 },
-  deviceScaleFactor: 1,
-  reducedMotion: "reduce",
-  ...(screenshotsOnly ? {} : { recordVideo: { dir: temporaryVideo, size: { width: 1440, height: 960 } } }),
+import { mkdir, mkdtemp, rename, rm, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+const { chromium } = await import('@playwright/test');
+const baseURL = process.env.DEMO_URL || 'http://127.0.0.1:3003';
+const sampleOnly = process.argv.includes('--sample');
+const screenshotsOnly = process.argv.includes('--screenshots-only');
+const output = path.resolve('docs');
+const screenshots = path.join(output, 'screenshots');
+const temporaryVideo = await mkdtemp(path.join(tmpdir(), 'omni-connected-demo-'));
+await mkdir(screenshots, {recursive:true});
+const macChrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const chromePath = process.env.PLAYWRIGHT_CHROME_PATH || (existsSync(macChrome) ? macChrome : undefined);
+const browser = await chromium.launch({headless:true,...(chromePath ? {executablePath:chromePath} : {})});
+const context = await browser.newContext({viewport:{width:1440,height:960},reducedMotion:'reduce',...(screenshotsOnly?{}:{recordVideo:{dir:temporaryVideo,size:{width:1440,height:960}}})});
+const page=await context.newPage();
+page.setDefaultTimeout(48_000);
+const responses=[];
+page.on('response',async(response)=>{
+  if (!/\/api\/(bridge|visits|documents)$/.test(response.url())) return;
+  try { responses.push({route:new URL(response.url()).pathname,status:response.status(),request:response.request().postDataJSON(),result:await response.json()}); } catch {}
 });
-const page = await context.newPage();
-page.setDefaultTimeout(15_000);
-
-async function selectSample(target = page) {
-  await target.goto(baseURL, { waitUntil: "networkidle" });
-  await target.getByLabel("Explanation engine").selectOption("sample");
+async function caption(title,body){
+  await page.evaluate(({title,body,sampleOnly})=>{
+    let box=document.getElementById('recording-caption');
+    if(!box){box=document.createElement('aside');box.id='recording-caption';box.setAttribute('aria-hidden','true');Object.assign(box.style,{position:'fixed',left:'24px',right:'24px',bottom:'16px',zIndex:'10000',pointerEvents:'none',background:'rgba(20,55,46,.98)',color:'#f8fbf5',borderRadius:'7px',padding:'16px 22px',fontFamily:'Arial,sans-serif',display:'grid',gridTemplateColumns:'210px 1fr',gap:'24px'});document.body.append(box);}
+    box.replaceChildren();
+    const label=document.createElement('div');label.textContent=sampleOnly?'OMNI-BRIDGE\nLABELED SAMPLE WALKTHROUGH':'OMNI-BRIDGE\nLIVE + LABELED SAMPLE DEMO';Object.assign(label.style,{whiteSpace:'pre-line',fontSize:'10px',letterSpacing:'1px',lineHeight:'1.7',color:'#c4d8ca'});
+    const content=document.createElement('div');const heading=document.createElement('strong');heading.textContent=title;Object.assign(heading.style,{display:'block',fontSize:'18px',fontWeight:'500',marginBottom:'5px'});const paragraph=document.createElement('p');paragraph.textContent=body;Object.assign(paragraph.style,{fontSize:'13px',lineHeight:'1.5',margin:'0',color:'#d2e1d5'});content.append(heading,paragraph);box.append(label,content);
+  },{title,body,sampleOnly});
 }
-
-async function createDraft() {
-  await page.getByRole("button", { name: /^(Create|Regenerate) explanation$/ }).click();
-  await page.getByText("Prepared sample", { exact: true }).waitFor();
-  await page.locator(".review-heading-row").scrollIntoViewIfNeeded();
-}
-
-async function releaseDraft(target = page) {
-  const checkbox = target.getByRole("checkbox", { name: "I have reviewed the source" });
-  await checkbox.scrollIntoViewIfNeeded();
-  await checkbox.check();
-  const share = target.getByRole("button", { name: "Share with participant", exact: true });
-  await share.scrollIntoViewIfNeeded();
-  await share.click();
-  await target.locator(".participant-translation").waitFor();
-  await target.locator(".participant-panel").evaluate((element) => { element.scrollTop = 0; });
-}
-
-async function changeLocale(locale) {
-  await page.getByLabel("Participant preferred language").selectOption(locale);
-  await page.locator(".coordinator-column").evaluate((element) => { element.scrollTop = 0; });
-}
-
-async function verifyParticipantLayout(target, label, expectedHeight) {
-  const geometry = await target.locator(".participant-panel").evaluate((panel) => {
-    const actions = panel.querySelector(".participant-actions").getBoundingClientRect();
-    const footer = panel.querySelector(".participant-bottom").getBoundingClientRect();
-    return { actionsBottom: actions.bottom, footerTop: footer.top, panelHeight: panel.getBoundingClientRect().height, scrollHeight: panel.scrollHeight, clientHeight: panel.clientHeight };
-  });
-  if (geometry.actionsBottom > geometry.footerTop + 1) throw new Error(`${label}: copy controls overlap the participant footer.`);
-  if (expectedHeight && Math.abs(geometry.panelHeight - expectedHeight) > 1) throw new Error(`${label}: desktop workspace height changed unexpectedly.`);
-  console.log(`${label} layout verified: ${JSON.stringify(geometry)}`);
-}
-
-async function caption(title, body) {
-  await page.evaluate(({ title, body }) => {
-    let caption = document.getElementById("recording-caption");
-    if (!caption) {
-      caption = document.createElement("aside");
-      caption.id = "recording-caption";
-      caption.setAttribute("aria-hidden", "true");
-      Object.assign(caption.style, {
-        position: "fixed", left: "100px", bottom: "18px", right: "28px", zIndex: "10000",
-        pointerEvents: "none", background: "rgba(23, 62, 50, 0.97)", color: "#f8fbf5",
-        borderRadius: "8px", padding: "17px 22px", fontFamily: "Arial, Helvetica, sans-serif",
-        boxShadow: "0 6px 30px rgba(15, 44, 30, .1)", display: "grid",
-        gridTemplateColumns: "190px 1fr", columnGap: "24px", alignItems: "center",
+async function scene(seconds,title,body,action){const started=Date.now();await caption(title,body);console.log(`Scene: ${title}`);if(action)await action();const remaining=seconds*1000-(Date.now()-started);if(remaining>0)await page.waitForTimeout(remaining);}
+async function prepareDocument(target=page){await target.getByRole('button',{name:'Prepare explanation',exact:true}).click();await target.locator('.doc-translated-draft').first().waitFor();}
+async function shareDocument(target=page){await target.getByRole('checkbox',{name:'I have reviewed the source, explanation, and English reverse rendering.',exact:true}).check();await target.getByRole('button',{name:'Show to participant',exact:true}).click();await target.locator('.doc-released').waitFor();await target.locator('.doc-participant').evaluate(e=>e.scrollTop=0);}
+async function shareTurn(){await page.getByRole('checkbox',{name:'I have reviewed the original, translation, and reverse rendering.',exact:true}).check();await page.getByRole('button',{name:'Share this turn',exact:true}).click();}
+try{
+  if(!screenshotsOnly){
+    await page.goto(baseURL,{waitUntil:'networkidle'});
+    await page.getByLabel('Explanation engine').selectOption(sampleOnly?'sample':'live');
+    await scene(10,'Understand the trial. Then discuss it.','One source, two voices, five languages. This fictional education prototype keeps a human review step before sharing.');
+    await scene(12,'Start with a confusing trial paragraph.','The CLEAR Study explains random assignment, a 50% chance, and placebo. The original stays visible.',async()=>{
+      await page.getByRole('button',{name:/02 Group assignment/}).click();
+      await page.getByRole('button',{name:'Explain term: placebo',exact:true}).first().click();
+      await page.waitForTimeout(2500);await page.getByRole('button',{name:'Close glossary'}).click();
+    });
+    await scene(20,sampleOnly?'Prepare a labeled Turkish sample.':'Generate a real Turkish draft with Gemini.','A separate call renders only the translated text back into English. Neither rendering certifies accuracy.',()=>prepareDocument());
+    await scene(14,'Compare the draft with its source.','Source evidence and numerical checks support inspection. The participant receives nothing until the coordinator reviews and shares.',async()=>{await page.locator('.doc-evidence summary').click();await page.waitForTimeout(3000);await shareDocument();});
+    await scene(14,'The participant has a question.','Prepared question starters need no AI call. The editable question carries its source passage into Conversation.',async()=>{
+      await page.getByRole('button',{name:'Use question: Can you explain this part?',exact:true}).click();
+      await page.getByRole('button',{name:'Discuss this question',exact:true}).click();
+      await page.getByLabel('Participant message').scrollIntoViewIfNeeded();
+    });
+    if(!sampleOnly){
+      await scene(20,'Translate the participant’s words into English.','The app translates the question; it does not answer it. Both the translation and Turkish reverse rendering stay available for review.',async()=>{
+        await page.getByRole('button',{name:'Translate for clinician',exact:true}).click();await page.locator('.visit-review-texts').waitFor();await page.waitForTimeout(2500);await shareTurn();
       });
-      document.body.append(caption);
+      await scene(22,'A person replies. Gemini translates the reply.','This English response is written by the coordinator. It is reviewed before joining the bilingual history.',async()=>{
+        await page.getByLabel('Clinician message').fill('A computer assigns the group by chance. Neither you nor the researcher chooses the group. You have a 50% chance of either group.');
+        await page.getByRole('button',{name:'Translate for participant',exact:true}).click();await page.locator('.visit-review-texts').waitFor();await page.waitForTimeout(2500);await shareTurn();await page.getByRole('region',{name:'Shared conversation'}).scrollIntoViewIfNeeded();
+      });
+    }else{
+      await scene(42,'A clearly labeled conversation backup.','Sample mode loads prepared fixture turns. It makes no live model calls and does not translate arbitrary questions.',async()=>{await page.getByRole('button',{name:'Open prepared conversation',exact:true}).click();await page.getByRole('region',{name:'Shared conversation'}).scrollIntoViewIfNeeded();});
     }
-    caption.replaceChildren();
-    const label = document.createElement("div");
-    Object.assign(label.style, { fontSize: "10px", letterSpacing: "1.4px", lineHeight: "1.7", color: "#c2d7b9" });
-    label.textContent = "OMNI-BRIDGE\nPREPARED SAMPLE DEMO";
-    label.style.whiteSpace = "pre-line";
-    const content = document.createElement("div");
-    const heading = document.createElement("strong");
-    heading.textContent = title;
-    Object.assign(heading.style, { display: "block", fontWeight: "500", fontSize: "18px", marginBottom: "5px" });
-    const description = document.createElement("p");
-    description.textContent = body;
-    Object.assign(description.style, { margin: "0", fontSize: "13px", lineHeight: "1.5", color: "#cfdec7" });
-    content.append(heading, description);
-    caption.append(label, content);
-  }, { title, body });
-}
-
-async function scene(seconds, title, body, action) {
-  const start = Date.now();
-  await caption(title, body);
-  console.log(`Scene: ${title}`);
-  if (action) await action();
-  const remaining = seconds * 1000 - (Date.now() - start);
-  if (remaining > 0) await page.waitForTimeout(remaining);
-}
-
-try {
-  if (!screenshotsOnly) {
-  await selectSample();
-  console.log(`Recording started: ${baseURL} · 180-second prepared sample walkthrough`);
-
-  await scene(12, "A clinical research conversation, in two views.", "A coordinator reviews explanations before sharing them. This recording uses prepared samples, not live Gemini or microphone input.");
-  await scene(12, "Start with the original study document.", "The fictional CLEAR Study stays visible. Highlights call attention to numbers, uncertainty, and participant rights.", async () => {
-    await page.getByRole("button", { name: /02 Group assignment/ }).click();
-  });
-  await scene(14, "Create a Turkish explanation. Keep the draft private.", "The participant still sees a waiting screen while the coordinator reviews the draft and its English rendering.", createDraft);
-  await scene(16, "Review first. Then share.", "The coordinator explicitly reviews the wording. The participant receives a plain-language explanation and the study’s 50/50 assignment diagram.", releaseDraft);
-  await scene(16, "Switching languages clears the previous explanation.", "Select Spanish, generate another prepared sample, and review it before sharing. Language changes never reuse an old draft.", async () => {
-    await changeLocale("es-419");
-    await page.waitForTimeout(1800);
-    await createDraft();
-    await page.waitForTimeout(2200);
-    await releaseDraft();
-  });
-  await scene(16, "Explain study procedures in Portuguese.", "The source and translated sample retain 4 visits, 8 weeks, approximately 60 minutes, and the 5 mL sample size.", async () => {
-    await changeLocale("pt-BR");
-    await page.getByRole("button", { name: /03 Visits & procedures/ }).click();
-    await createDraft();
-    await page.waitForTimeout(2000);
-    await releaseDraft();
-  });
-  await scene(14, "The same reviewed workflow, in Hindi.", "Five language options share one deliberate process. These prepared translations demonstrate the interface, not clinical validation.", async () => {
-    await changeLocale("hi-IN");
-    await createDraft();
-    await page.waitForTimeout(1800);
-    await releaseDraft();
-  });
-  await scene(14, "And in Mandarin.", "Readable text and a simple visit sequence support a conversation with the research team.", async () => {
-    await changeLocale("zh-CN");
-    await createDraft();
-    await page.waitForTimeout(1800);
-    await releaseDraft();
-  });
-  await scene(18, "Use a reviewed, typed conversation source.", "This is real editable input using the supported sample script. The microphone remains available in supported browsers, but is not used in this recording.", async () => {
-    await changeLocale("tr-TR");
-    await page.getByRole("tab", { name: "Conversation", exact: true }).click();
-    await page.getByRole("button", { name: "Clear transcript", exact: true }).click();
-    await page.getByLabel("ENGLISH SOURCE").pressSequentially("You have a 50% chance of being assigned to either group. Neither you nor the researcher chooses the group. You may receive a placebo, which has no active study drug.", { delay: 28 });
-  });
-  await scene(16, "Check the conversation draft against its source.", "Review notes and the English rendering help inspection. They do not independently verify translation accuracy.", async () => {
-    await createDraft();
-    await page.waitForTimeout(2500);
-    await releaseDraft();
-  });
-  await scene(20, "Participant choice stays central.", "The withdrawal section explains leaving at any time without penalty and preserving regular care. Missing study policy is not invented.", async () => {
-    await page.getByRole("tab", { name: "Consent guide", exact: true }).click();
-    await page.getByRole("button", { name: /06 Leaving the study/ }).click();
-    await createDraft();
-    await page.waitForTimeout(2500);
-    await releaseDraft();
-  });
-  await scene(12, "Reset for a fresh education session.", "Omni-Bridge supports understanding and questions. It does not collect consent, replace qualified interpretation, or provide personal medical advice.", async () => {
-    await page.getByRole("button", { name: "New session", exact: true }).click();
-    await page.locator(".coordinator-column").evaluate((element) => { element.scrollTop = 0; });
-  });
-
-  const video = page.video();
-  await context.close();
-  const videoPath = await video.path();
-  await rename(videoPath, path.join(output, "demo.webm"));
-  console.log("Saved docs/demo.webm");
-  } else {
-    await context.close();
-  }
-
-  const stills = await browser.newContext({ viewport: { width: 1440, height: 960 }, reducedMotion: "reduce", deviceScaleFactor: 1 });
-  const still = await stills.newPage();
-  await selectSample(still);
-  await still.waitForTimeout(800);
-  await still.screenshot({ path: path.join(screenshots, "desktop-workspace.png"), animations: "disabled" });
-  await still.getByRole("button", { name: "Create explanation", exact: true }).click();
-  await still.getByText("Prepared sample", { exact: true }).waitFor();
-  await releaseDraft(still);
-  await still.locator(".coordinator-column").evaluate((element) => { element.scrollTop = 0; });
-  await still.waitForTimeout(800);
-  await verifyParticipantLayout(still, "Desktop", 865);
-  await still.screenshot({ path: path.join(screenshots, "desktop.png"), animations: "disabled" });
-  await still.setViewportSize({ width: 390, height: 844 });
-  await still.evaluate(() => window.scrollTo(0, 0));
-  await still.waitForTimeout(1000);
-  await still.screenshot({ path: path.join(screenshots, "mobile.png"), animations: "disabled" });
-  await still.locator(".participant-panel").evaluate((element) => element.scrollIntoView({ block: "start", behavior: "instant" }));
-  await still.waitForTimeout(1000);
-  await verifyParticipantLayout(still, "Mobile");
-  await still.screenshot({ path: path.join(screenshots, "mobile-participant.png"), animations: "disabled" });
-  const overflow = await still.evaluate(() => document.documentElement.scrollWidth > innerWidth);
-  if (overflow) throw new Error("Mobile screenshot has horizontal overflow.");
-  await stills.close();
-  console.log("Saved desktop-workspace.png, desktop.png, mobile.png, mobile-participant.png; mobile has no horizontal overflow.");
-} finally {
-  await browser.close();
-  await rm(temporaryVideo, { recursive: true, force: true });
-}
+    await scene(12,'Move between workspaces without losing the session.','The shared language, document, questions and turns stay in memory across navigation. Refresh or New session clears work.',async()=>{
+      await page.getByRole('link',{name:'Document guide',exact:true}).click();await page.locator('.doc-released').waitFor();await page.locator('.doc-participant').evaluate(e=>e.scrollTop=0);
+    });
+    await scene(22,'Reuse the guide for a fictional visit note.','This segment explicitly uses Sample mode. It explains the supplied note, preserves its quantities, and adds no treatment target.',async()=>{
+      await page.getByLabel('Explanation engine').selectOption('sample');await page.getByLabel('Document source').selectOption('visit-summary');await prepareDocument();await page.waitForTimeout(2500);await shareDocument();
+    });
+    await scene(14,'Ready to discuss, with clear limits.','Typed input remains available. Microphone support depends on the browser. Public or fictional pasted text uses Live Gemini; no records are saved.',async()=>{
+      await page.getByRole('button',{name:'Reading preferences',exact:true}).click();await page.getByLabel('Text size').selectOption('large');await page.getByRole('button',{name:'Done',exact:true}).click();
+    });
+    const video=page.video();await context.close();await rename(await video.path(),path.join(output,'demo.webm'));
+    await writeFile(path.join(output,'integrated-demo-qa.json'),JSON.stringify({recordedAt:new Date().toISOString(),model:'gemini-3.5-flash-lite',liveRecording:!sampleOnly,notes:'Actual application API responses; captions only are recording overlays. Typed synthetic inputs; no microphone or qualified language review.',responses},null,2)+'\n');
+    console.log('Saved docs/demo.webm and actual response record.');
+  }else{await context.close();}
+  const stills=await browser.newContext({viewport:{width:1440,height:960},reducedMotion:'reduce'});const still=await stills.newPage();
+  await still.goto(baseURL,{waitUntil:'networkidle'});await still.getByLabel('Explanation engine').selectOption('sample');
+  await still.screenshot({path:path.join(screenshots,'desktop-workspace.png')});await prepareDocument(still);await still.screenshot({path:path.join(screenshots,'document-review.png')});await shareDocument(still);await still.screenshot({path:path.join(screenshots,'desktop.png')});
+  await still.getByRole('button',{name:'Use question: Can you explain this part?',exact:true}).click();await still.getByRole('button',{name:'Discuss this question',exact:true}).click();await still.screenshot({path:path.join(screenshots,'document-question-handoff.png')});
+  await still.getByRole('button',{name:'Open prepared conversation',exact:true}).click();await still.getByRole('region',{name:'Shared conversation'}).scrollIntoViewIfNeeded();await still.screenshot({path:path.join(screenshots,'visits-conversation.png')});
+  await still.getByRole('link',{name:'Document guide',exact:true}).click();await still.getByLabel('Document source').selectOption('visit-summary');await prepareDocument(still);await shareDocument(still);await still.screenshot({path:path.join(screenshots,'visit-document.png')});
+  await still.setViewportSize({width:390,height:844});await still.getByRole('tab',{name:'Source',exact:true}).click();await still.screenshot({path:path.join(screenshots,'mobile.png')});await still.getByRole('tab',{name:'Participant',exact:true}).click();await still.screenshot({path:path.join(screenshots,'mobile-participant.png')});
+  if(await still.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw new Error('Mobile horizontal overflow');
+  await stills.close();console.log('Updated connected desktop/mobile screenshots.');
+}finally{await browser.close();await rm(temporaryVideo,{recursive:true,force:true});}

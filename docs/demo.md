@@ -1,44 +1,67 @@
-# Three-minute demonstration
+# Three-minute integrated demonstration
 
-Use a laptop with a browser known to support microphone recognition, if demonstrating speech. Keep typed input available. Prepare `localhost:3000` and a second browser tab with `docs/demo-slides.html`. The entire scenario uses a fictional trial and consenting teammates.
+Use the team's tested laptop and one shared browser session. Begin with the fictional CLEAR trial, then show the participant asking a question and the human coordinator replying. The original document remains visible. A fictional outpatient note is a short second-source example, not a real prescription or patient record.
 
-Decide before recording whether you are demonstrating **sample** or **live Gemini**. Show the engine label on screen and say which one it is. Without a key, use the fixed sample text below. Do not narrate stored sample output as a fresh Gemini response. If a live request fails, explain the error and explicitly switch to the labelled sample walkthrough.
+Preflight the deployed URL, Vercel access, network, and Gemini quota. Use Turkish for the main story because a teammate can inspect it directly; do not claim completed qualified language review. Keep typing available even if the microphone works. Use [the editable 11-slide HTML deck](demo-slides.html).
 
-## Script and timing
+## Recording plan
 
-| Time | Screen / action | Suggested narration |
+| Time | Screen and action | Suggested narration |
 | --- | --- | --- |
-| 0:00–0:20 | Show title and both modes | “Omni-Bridge helps a research coordinator explain a study across languages. We built two equal workflows: understanding a consent document, and reviewing a spoken explanation. This demonstration uses a fictional trial.” |
-| 0:20–0:35 | Consent guide; choose Spanish and Group assignment | “The original stays visible. In CLEAR-026, the participant has a 50% chance of either group. A placebo has no active study drug, and benefit is not guaranteed.” |
-| 0:35–1:05 | Generate a draft; show source, Spanish explanation, back-translation and flags | “This is [a fixed sample / a live Gemini result]. The coordinator compares the original with the English back-translation and review flags. These checks can miss errors, so the result stays a draft.” |
-| 1:05–1:20 | Release after inspection; switch to Visits or another language | “Only the coordinator's release puts this explanation on the participant side. Changing the section or language invalidates the earlier draft.” |
-| 1:20–1:40 | Conversation bridge; speak the fixed text or paste it | “For a conversation, speech becomes an editable transcript. The coordinator checks it before sending. Typed input supports browsers or rooms where speech recognition is unavailable.” |
-| 1:40–2:15 | Correct transcript if needed; send; inspect and release | “The same review step applies here. Live mode makes a separate back-translation request without the original English. That improves inspectability, but using the same model does not provide independent clinical verification.” |
-| 2:15–2:35 | Show the five language choices and clear engine label | “The prototype includes Turkish, Spanish, Brazilian Portuguese, Hindi, and simplified Chinese. All five need qualified human language review. Turkish team review is pending. We are not claiming validated translations.” |
-| 2:35–3:00 | Show closing slide or return to the source | “The next work is review with interpreters and research coordinators, plus documented error tests. We keep the source and human discussion central. This prototype does not obtain consent, store a clinical approval, or give personal medical advice.” |
+| 0:00–0:15 | Title, then Document guide with CLEAR and Turkish selected | “Omni-Bridge connects understanding a trial with asking the next question. This is a fictional education demonstration.” |
+| 0:15–0:40 | Select randomization. Prepare a labelled sample if conserving quota. Show source, translation, English rendering, and flags. | “The source says there is a 50% chance of either group, and neither person chooses. The coordinator sees a draft first. This prepared example is labelled Sample mode.” |
+| 0:40–0:55 | Review and share. Show the participant explanation and source paragraph. | “Sharing releases this exact draft. The source link returns us to the wording we are discussing.” |
+| 0:55–1:15 | Attach a Turkish question to the source paragraph and open Conversation. Select Gemini live visibly. | “The participant can ask in their own language. The editable question and paragraph context remain while we switch into live translation.” |
+| 1:15–1:45 | Translate the participant question with Gemini live visibly selected. Show the actual result or error. Review/share if releasable. | “This segment makes a fresh live request. Gemini translates the participant's own words into English, then separately renders that translation back. It does not answer the question.” |
+| 1:45–2:10 | Human coordinator types or speaks a short reply. Correct recognized text if needed, translate, review, and share. | “The human coordinator supplies the reply. English travels back to Turkish through the same review step. Typing remains available.” |
+| 2:10–2:30 | Return to Document guide. Show the fictional visit summary and a source-linked explanation with its engine label. | “The same session can explain this fictional follow-up note. Each paragraph stays attached to its source. The explanation describes the documented plan without creating a new one.” |
+| 2:30–2:45 | Enlarge text in Reading preferences. Briefly show all language choices. | “Reading preferences change the display without rewriting reviewed text. The prototype supports five language choices.” |
+| 2:45–3:00 | Closing slide, repository, limitations | “We built a connected, inspectable workflow. Translation quality, real speech behavior, and clinical use need further review. Our repository discloses AI assistance, observed tests, and limitations.” |
 
-In live mode, generation latency can exceed these timing slots. Preflight the network and account quota; pause narration while showing a truthful loading state, or record a longer take and edit idle time without concealing failures or substituting sample output.
+Switching engines clears translated/shared work and requires fresh review, while retaining the editable speaker question and its paragraph context. Show that change honestly. Starting in live mode is also possible when quota allows.
 
-## Reproducible sample conversation
+Never conceal a live failure or splice sample output under a live label. If generation exceeds the timing slot, show truthful loading and extend the take or edit idle time with a caption. A recorded live segment is only a live success when its actual request succeeds. Its elapsed time describes that request, not typical performance.
+
+## Reproducible live exchange
+
+Participant question in Turkish:
 
 ```text
-You have a 50% chance of being assigned to either group. Neither you nor the researcher chooses the group. You may receive a placebo, which has no active study drug.
+Bu kurgusal çalışmaya katılmak zorunda mıyım?
 ```
 
-Speech recognition can change punctuation or numerals. Review and correct the text to the supported sample before sending. Use the live engine for arbitrary edited conversation.
+The intended English meaning is “Do I have to participate in this fictional study?” Inspect the actual returned text. Do not insert that expected meaning into the recording as if Gemini returned it.
 
-## Questions to be ready for
+The human coordinator can provide this reply based on the fictional source:
 
-**Why back-translation?** It lets an English-speaking coordinator inspect a second rendering of the target explanation. It can expose errors, but can also reproduce a shared error. A qualified person still must review the target language directly.
+```text
+Taking part is your choice. You may leave at any time without penalty. Leaving will not affect your regular care.
+```
 
-**Why five languages?** They demonstrate script and locale differences in the interface. They are prototype choices with pending language review, not a claim that every translation is ready for patients.
+Use live mode for this arbitrary exchange. For the fixed sample pipeline, use **Use next sample turn**. It fills a supported utterance while translation, review, and sharing remain explicit. **Open prepared conversation** loads all eight fixture turns without individual review and labels that distinction.
 
-**Where does Gemini matter?** In live mode it simplifies the reviewed source, translates it into the chosen language, and returns a separate English back-translation through the server. Sample mode is an openly labelled fixture for reproducible demonstrations.
+## Sample backup
 
-**Is this real informed consent?** No. The fixture is fictional. The interface supports education and a coordinator's review; it contains no signatures and cannot establish informed consent.
+If quota or connectivity prevents live translation, leave the visible error in the take, say “Live translation is unavailable in this run,” and switch explicitly to Sample mode. Use the prepared placebo question and human reply, or open the prepared conversation and explain that it contains fixed examples. This demonstrates the workflow, not current live availability.
 
-**How do you measure success?** Start with the documented planted-error cases and honest detection results. Then ask qualified language reviewers and research coordinators whether key concepts remain accurate and easy to explain. No clinical outcome or accuracy result has been established by this demo.
+The outpatient note has a prepared fixture. Arbitrary pasted synthetic text needs live mode, acknowledgment, and at most 4,000 characters. Uploads, OCR, EHR links, real documents, and generated medical answers are outside this build.
 
-## Deliverables
+## Questions to prepare for
 
-The local HTML presentation has 11 slides, with an exported PDF included. The [silent, captioned walkthrough](demo.webm) lasts 3 minutes and 0.68 seconds and demonstrates fixed Prepared sample output and the review/release workflow. It does not show live Gemini generation or validate real microphone behavior; actual live requests are documented in [the QA report](live-qa.json). Before submission, verify the current organizer form and sponsor requirements, include a reproducible repository, and remove all credentials and personal material. Regeneron describes a roughly three-minute video and 10–12-slide deck as suggested lengths, not hard limits.
+**What does Gemini contribute?** Live calls explain source paragraphs and translate human turns. A fresh second request creates a reverse rendering from only generated target text. Both requests use the same model and can share errors.
+
+**Who answers the participant?** The human clinician or coordinator. The app translates each person's own words.
+
+**Why show sources?** Reviewers can inspect the exact paragraph behind an explanation and attach a question. A source link alone does not prove faithful translation.
+
+**What has been evaluated?** Report current recorded checks and actual live observations only. Browser speech mocks do not evaluate real recognition accuracy. All five languages need qualified review. No patient outcome or clinical validation has been established.
+
+**What is stored?** Session work stays in page memory, with no accounts or database. Live text goes to Gemini. Browser speech recognition may use a remote service. Do not enter patient information.
+
+## Submission materials
+
+Regeneron suggests roughly three minutes of video and 10–12 slides. The updated HTML deck contains 11 slides. The current PDF has 11 rendered and visually inspected pages. The silent captioned recording is 2 minutes 40.68 seconds and includes actual live trial, participant-question, and coordinator-reply operations, followed by a labeled visit-note sample. See [capture metadata](demo-capture.json) and [actual responses](integrated-demo-qa.json). The recording script operates review controls for demonstration; it does not establish human language review. Team review and narration remain available before submission.
+
+Use [the guidelines check](guidelines.md) for the one-track/two-superlative limit, build-period provenance, and schedule conflicts. Treat 10 a.m. Eastern on Sunday, October 11 as the conservative submission/build cutoff and confirm judging on site. Complete Devpost fields, list every teammate, review the AI-assistance disclosure, and verify judge access to all links.
+
+To reproduce the capture, install the Playwright video encoder (`npx playwright install ffmpeg`), start a production build on port 3003, and run `node scripts/record-demo.mjs`. `DEMO_URL` and `PLAYWRIGHT_CHROME_PATH` override local defaults. Use `--sample` only for an explicitly labeled fixture recording, or `--screenshots-only` for stills. Live mode uses your configured server key and never mocks model responses.

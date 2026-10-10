@@ -4,6 +4,7 @@ import { useCallback, useEffect, useReducer, useRef } from "react";
 import { bridgeReducer, initialBridgeState } from "@/lib/bridge-state";
 import type { BridgeMode, BridgeRequest, BridgeResult, Engine, Locale } from "@/lib/types";
 import { bridgeResultSchema } from "@/lib/bridge/schema";
+import { findSection, STUDY } from "@/lib/study";
 
 export function useBridge(liveAvailable: boolean) {
   const [state, dispatch] = useReducer(bridgeReducer, liveAvailable, initialBridgeState);
@@ -39,7 +40,8 @@ export function useBridge(liveAvailable: boolean) {
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error?.message || "The explanation could not be prepared. Please try again.");
       const validated = bridgeResultSchema.safeParse(data);
-      if (!validated.success || validated.data.requestId !== requestId) {
+      const expectedSource = payload.mode === "consent" ? findSection(payload.sectionId!)?.body : payload.text;
+      if (!validated.success || validated.data.requestId !== requestId || validated.data.locale !== payload.locale || validated.data.engine !== payload.engine || validated.data.mode !== payload.mode || validated.data.sourceText !== expectedSource || validated.data.studyVersion !== STUDY.version || (payload.mode === "consent" && (validated.data.sourceSectionIds.length !== 1 || validated.data.sourceSectionIds[0] !== payload.sectionId))) {
         throw new Error("The response was incomplete. Nothing has been shared. Please try again.");
       }
       const result: BridgeResult = validated.data;

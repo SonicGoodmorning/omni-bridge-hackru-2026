@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/icons";
 import { useSpeech } from "@/hooks/use-speech";
-import { useVisits, type VisitSpeaker, type VisitTurn } from "@/hooks/use-visits";
-import { LANGUAGES, type Engine, type Locale } from "@/lib/types";
+import { type VisitSpeaker, type VisitTurn } from "@/hooks/use-visits";
+import { useSession } from "./session-provider";
+import { LANGUAGES, type Locale } from "@/lib/types";
 import { SAMPLE_VISIT } from "@/lib/visits/sample";
 
 const speechLocales: Record<Locale, string> = { "tr-TR": "tr-TR", "es-419": "es-MX", "pt-BR": "pt-BR", "hi-IN": "hi-IN", "zh-CN": "zh-CN" };
@@ -36,8 +37,9 @@ function ListenGlyph() {
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m11 5-6 4H2v6h3l6 4V5Zm4 3a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" /></svg>;
 }
 
-export function VisitsWorkspace({ liveAvailable }: { liveAvailable: boolean }) {
-  const controller = useVisits(liveAvailable);
+export function VisitsWorkspace() {
+  const session = useSession();
+  const controller = session.visits;
   const { state } = controller;
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -79,20 +81,15 @@ export function VisitsWorkspace({ liveAvailable }: { liveAvailable: boolean }) {
     setRecordingSpeaker(null);
   }
 
-  function resetVisit() {
-    cancelRecording();
+  useEffect(() => {
+    speechContext.current = null;
+    speech.cancel();
+    setRecordingSpeaker(null);
     stopPlayback();
     setPlaybackMessage("");
-    controller.reset();
-  }
-
-  function changeLocale(locale: Locale) {
-    if (locale === state.locale) return;
-    cancelRecording();
-    stopPlayback();
-    setPlaybackMessage("");
-    controller.setLocale(locale);
-  }
+  // Global resets and settings also invalidate browser audio sessions.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session.sessionEpoch]);
 
   function record(speaker: VisitSpeaker) {
     if (speech.isListening) { speech.stop(); return; }
@@ -144,30 +141,13 @@ export function VisitsWorkspace({ liveAvailable }: { liveAvailable: boolean }) {
   const targetName = result ? languageName(result.targetLanguage) : language.nativeName;
   const preparedOnly = state.turns.length > 0 && state.turns.every((turn) => turn.prepared);
 
-  return <div className="workspace-shell visits-shell" inert={!ready}>
-    <aside className="app-rail" aria-label="Omni-Bridge navigation">
-      <Link className="brand-mark" href="/" aria-label="Omni-Bridge home"><Icon name="bridge" size={29} /></Link>
-      <div className="rail-tools"><Link href="/" className="rail-button" aria-label="Clinical research workspace" title="Clinical research workspace"><Icon name="document" size={22} /></Link><Link href="/visits" className="rail-button active" aria-current="page" aria-label="Two-way visits" title="Two-way visits"><Icon name="chat" size={22} /></Link></div>
-      <button className={`rail-button help-button ${helpOpen ? "active" : ""}`} aria-label="About visits" aria-expanded={helpOpen} onClick={() => setHelpOpen(!helpOpen)}><Icon name="help" size={22} /></button>
-    </aside>
-    <div className="app-main">
-      <header className="session-header">
-        <Link href="/" className="brand-wordmark" aria-label="Omni-Bridge home">omni<span>bridge</span><div className="brand-caption">A SHARED LANGUAGE FOR UNDERSTANDING</div></Link>
-        <nav className="visit-header-navigation" aria-label="Workspace"><Link href="/">Consent guide</Link><Link href="/visits" aria-current="page">Visits</Link></nav>
-        <button className="text-button visit-reset" onClick={resetVisit}><Icon name="reset" size={16} />New visit</button>
-      </header>
-
-      {helpOpen && <section className="help-panel visit-help"><div><strong>One speaker at a time. Both voices heard.</strong><p>Speak or type, correct the transcript, translate, then review and share. This synthetic education prototype is not for actual patient care and does not replace a qualified interpreter. Do not enter real patient information. Typed and translated turns remain in this page’s memory until you reset or leave. Live translation sends the current turn to Gemini; speech recognition may use your browser’s remote service.</p></div><button className="icon-button" aria-label="Close visit information" onClick={() => setHelpOpen(false)}><Icon name="close" /></button></section>}
-
+  return <div className="visits-shell" inert={!ready}>
+      {helpOpen && <section className="help-panel visit-help"><div><strong>Both voices stay visible.</strong><p>Review each turn before sharing. Use fictional or public demo text only. Work stays in session memory when you move to Document guide; reset or refresh clears it. Live text goes to Gemini, and browser speech may use a remote service.</p></div><button className="icon-button" aria-label="Close visit information" onClick={() => setHelpOpen(false)}><Icon name="close" /></button></section>}
       <main className="visits-main">
-        <div className="visit-introduction"><div><div className="eyebrow">TWO-WAY VISITS <span>·</span> SYNTHETIC PRACTICE</div><h1>A conversation, both ways.</h1><p>The clinician speaks English. The participant speaks {language.nativeName}. Each turn is reviewed before sharing.</p></div><span className="visit-pair-label"><span>EN</span><Icon name="bridge" size={24} /><span>{language.short}</span></span></div>
 
-        <div className="visit-settings">
-          <label className="visit-language-label"><span>Participant language</span><select aria-label="Visit participant language" value={state.locale} onChange={(event) => changeLocale(event.target.value as Locale)}>{LANGUAGES.map((item) => <option value={item.locale} key={item.locale}>{item.nativeName}</option>)}</select></label>
-          <label className="visit-engine-label"><span className={`engine-dot ${state.engine === "live" ? "live" : ""}`} /><select aria-label="Visit translation engine" value={state.engine} onChange={(event) => { if (state.engine === event.target.value) return; cancelRecording(); stopPlayback(); setPlaybackMessage(""); controller.setEngine(event.target.value as Engine); }}><option value="sample">Sample mode</option><option value="live" disabled={!liveAvailable}>Gemini live{!liveAvailable ? " · not configured" : ""}</option></select></label>
-          <span className="visit-settings-note">Changing language or engine starts a fresh conversation.</span>
-        </div>
+        <div className="visit-introduction"><div><div className="eyebrow">TWO-WAY CONVERSATION <span>·</span> SYNTHETIC PRACTICE</div><h1>A conversation, both ways.</h1><p>The clinician speaks English. The participant speaks {language.nativeName}. Each turn is reviewed before sharing.</p></div><span className="visit-pair-label"><span>EN</span><Icon name="bridge" size={24} /><span>{language.short}</span></span></div>
 
+        {session.questionOrigin && <aside className="question-origin" aria-label="Question source"><div><span className="eyebrow">FROM DOCUMENT GUIDE</span><strong>{session.questionOrigin.title}</strong><blockquote>{session.questionOrigin.quote}</blockquote></div><Link className="text-button" onClick={() => session.setDocumentView("source")} href={`/#source-${session.questionOrigin.paragraphId}`}>Return to source<Icon name="arrow" size={14} /></Link><p>The participant can edit this question. Translate it here for human discussion; the app does not answer it.</p></aside>}
         <div className="visit-sample-bar"><div><Icon name="document" size={17} /><span><strong>Try the fictional CLEAR visit</strong><small>{SAMPLE_VISIT.length} prepared turns. No live model calls in sample mode.</small></span></div><div className="visit-sample-actions"><button className="text-button" onClick={useNextSample}>Use next sample turn <span className="visit-sample-count">{state.sampleCursor % SAMPLE_VISIT.length + 1}/{SAMPLE_VISIT.length}</span><Icon name="arrow" size={14} /></button><button className="text-button" onClick={openPrepared}>Open prepared conversation</button></div></div>
 
         <div className="visit-speakers">
@@ -209,8 +189,7 @@ export function VisitsWorkspace({ liveAvailable }: { liveAvailable: boolean }) {
           {state.turns.length === 0 ? <div className="visit-conversation-empty"><div className="visit-empty-line"><SpeakerGlyph speaker="clinician" /><span /><SpeakerGlyph speaker="participant" /></div><h3>Two voices. One conversation.</h3><p>Translate a message above, review its wording, and share it here.<br />Each turn keeps the speaker’s original words alongside the translation.</p></div> : <ol className="visit-turns">{state.turns.map((turn, index) => <li key={turn.id}><article className={`visit-turn ${turn.speaker}`} data-speaker={turn.speaker} data-prepared={turn.prepared ? "true" : "false"}><div className="visit-turn-heading"><span><SpeakerGlyph speaker={turn.speaker} /><strong>{turn.speaker === "clinician" ? "Clinician" : "Participant"}</strong><small>TURN {String(index + 1).padStart(2, "0")}</small></span><span className="visit-turn-status">{turn.prepared ? "Prepared sample" : turn.engine === "sample" ? "Reviewed sample" : "Reviewed & shared"}</span></div><div className="visit-turn-texts"><div><div className="eyebrow">ORIGINAL · {languageName(turn.sourceLanguage)}</div><p lang={turn.sourceLanguage}>{turn.sourceText}</p></div><div><div className="eyebrow">TRANSLATION · {languageName(turn.targetLanguage)}</div><p lang={turn.targetLanguage}>{turn.translation}</p></div></div><div className="visit-turn-actions"><span><Icon name="arrow" size={12} />{turn.speaker === "clinician" ? "For participant" : "For clinician"}</span><button className="text-button" aria-label={`${playingId === turn.id ? "Stop audio for" : "Listen to translation of"} turn ${index + 1}`} disabled={!playbackAvailable} onClick={() => listen(turn)}>{playingId === turn.id ? <Icon name="stop" size={14} /> : <ListenGlyph />}{playingId === turn.id ? "Stop audio" : "Listen"}</button></div></article></li>)}</ol>}
           {playbackMessage && <p className="visit-audio-message" role="status">{playbackMessage}</p>}
         </section>
-        <footer className="visit-footer"><span><Icon name="help" size={14} />Synthetic education prototype · No real patient information</span><button className="text-button" onClick={() => setHelpOpen(!helpOpen)}>Privacy & limitations</button><span>Turns stay in this page until you reset or leave.</span></footer>
+        <footer className="visit-footer"><span><Icon name="help" size={14} />Synthetic education prototype · No real patient information</span><button className="text-button" onClick={() => setHelpOpen(!helpOpen)}>Privacy & limitations</button><span>Turns stay in this session until you reset or refresh.</span></footer>
       </main>
-    </div>
   </div>;
 }

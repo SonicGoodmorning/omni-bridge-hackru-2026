@@ -1,0 +1,54 @@
+{
+  "testedAt": "2026-10-10T19:42:46.091Z",
+  "model": "gemini-3.5-flash-lite",
+  "scenario": "synthetic pasted English study description → Turkish → English",
+  "httpStatus": 200,
+  "wallMs": 2798,
+  "request": {
+    "requestId": "integrated-live-paste-01",
+    "locale": "tr-TR",
+    "engine": "live",
+    "source": {
+      "kind": "paste",
+      "text": "This fictional study has 4 visits over 8 weeks. Joining is voluntary. You may leave at any time.",
+      "acknowledged": true
+    }
+  },
+  "result": {
+    "requestId": "integrated-live-paste-01",
+    "locale": "tr-TR",
+    "engine": "live",
+    "source": {
+      "id": "synthetic-paste",
+      "revision": "paste-c9d9b0eb-96",
+      "title": "Pasted synthetic document",
+      "provenance": "synthetic-paste",
+      "paragraphs": [
+        {
+          "id": "paste-p01",
+          "title": "Paragraph 1",
+          "text": "This fictional study has 4 visits over 8 weeks. Joining is voluntary. You may leave at any time."
+        }
+      ]
+    },
+    "blocks": [
+      {
+        "id": "paste-p01",
+        "sourceParagraphIds": [
+          "paste-p01"
+        ],
+        "translation": "Kurgusal not, bu kurgusal çalışmanın 8 hafta boyunca 4 ziyaretten oluştuğunu kaydetmektedir. Katılım isteğe bağlıdır. İstediğiniz zaman ayrılabilirsiniz.",
+        "backTranslation": "The fictional note records that this fictional study consists of 4 visits over 8 weeks. Participation is voluntary. You may withdraw at any time."
+      }
+    ],
+    "flags": [
+      {
+        "code": "REVIEW_AID",
+        "severity": "info",
+        "message": "Source links, reverse rendering, and numerical checks are review aids, not proof of accuracy. Check that each cited paragraph supports its explanation and preserves attribution, quantities, units, and negations."
+      }
+    ],
+    "elapsedMs": 2658,
+    "canRelease": true
+  }
+}

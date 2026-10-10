@@ -1,117 +1,137 @@
 # Acceptance and human QA
 
-Use synthetic data and consenting teammates. Check a box only after the test is observed. Automated checks and schema validation do not establish translation quality or clinical fitness.
+Use synthetic material and consenting teammates. Mark manual checks only after observation. Automated tests, valid JSON, source links, and reverse rendering do not establish translation quality or clinical fitness.
 
-## Run record
+## Current unified build
 
-| Check | Result | Date / reviewer / evidence |
+| Check | Recorded result | Evidence |
 | --- | --- | --- |
-| `npm run typecheck` | Passed | October 10, 2026; implementation run reported by the root agent |
-| `npm test` | 25 unit tests passed | October 10, 2026; implementation run reported by the root agent |
-| `npm run build` | Passed | October 10, 2026; production build reported by the root agent |
-| `npm run test:e2e` | 10 browser tests passed | October 10, 2026; implementation run reported by the root agent |
-| HTML presentation layout | 11 slides checked; no overflow observed | October 10, 2026; browser review reported by the root agent |
-| Exported PDF visual review | All 11 rendered pages checked; no clipping or overlap observed | October 10, 2026; PDF rendered-page inspection after print-layout correction |
-| Final hosted build | Vercel preview `READY`; authentication enabled | October 10, 2026; CLI deployment `dpl_5LctqFKdUj9XiJo1yPKmkzEBRGXh` |
-| Clean setup with README | Passed | October 10, 2026; fresh GitHub clone, `npm ci`, example environment copied, type checking, 25 unit tests, and production build; reported by the root agent |
-| Type checking from a fresh clone | Passed | October 10, 2026; `next typegen` then `tsc --noEmit`, reported by the root agent |
-| Browser consent and conversation walkthrough | Not recorded | |
-| Live Turkish randomization smoke check | HTTP 200; 6,385 ms; `canRelease: true` | October 10, 2026; one development request reported by the root agent |
+| Type checking | Passed | October 10, 2026; root implementation run |
+| Unit suite | **59 passed** | October 10, 2026; root implementation run |
+| Final integrated browser suite | **30 passed in 26.2 s** | 14 connected-document cases + 16 Conversation cases; mocked live/speech services |
+| Current production build | Passed | Final integrated Next.js build, October 10, 2026 |
+| Updated HTML deck | 11 slides checked, no screen/print overflow or visual clipping observed | October 10, 2026; keyboard navigation and visual contact-sheet inspection |
+| Updated PDF | 11 pages exported and visually reviewed | Rendered contact sheet: no clipping or overlap observed |
+| Integrated video and screenshots | Captured and visually reviewed | 160.68 s, 1440×960; three real live operations plus a labeled sample; updated desktop/mobile images |
+| Unified hosted deployment | Vercel Preview READY; hosted build passed | [Integrated URL](https://express-monsoon-5gkbxhw-gs5nn2i3b-egegoodmorning-6248.vercel.app), encrypted server key, Flash-Lite, and existing Vercel authentication retained |
+| Real microphone and browser voice | Pending | Mocked services do not establish real behavior |
+| Qualified review in all five languages | Pending | No accuracy or clinical-validation claim |
 
-The live smoke result demonstrates that the configured pipeline returned a mechanically releasable response. It does not establish translation quality, completed Turkish review, typical latency, or clinical validity.
+The 59-unit run includes 19 new document cases in addition to the prior trial, visit, and reducer tests. Document coverage includes strict inputs/acknowledgment, five-language samples, source revisions and paragraph preservation, blind reverse rendering, exact block references, changed quantities/units, selected unsupported additions, attribution policy, sanitized failures, cancellation, and a shared deadline. These tests exercise controlled transports and deterministic checks; they do not measure model or clinical accuracy.
 
-### Observed automated and live coverage
+## Historical automated coverage
 
-The 10 browser tests cover the review/release gate, language and source invalidation, stale requests, five-language sample visit facts, fixed conversation input, rejected arbitrary sample text, API-error and malformed-output handling, narrow-screen layout, request validation, and ignored late speech callbacks after reset or mode changes. Microphone denial and transcript finalization use simulated browser recognition classes; they do not test a real microphone or speech-service accuracy. The manual checklist below intentionally remains pending.
+Before integration, a 40-case unit suite passed. A complete 25-browser run passed in 23.3 seconds, followed by a passing long-speech regression, yielding 26 observed cases: 16 Visits cases and 10 original-workspace cases. Their coverage included both directions, review/share gating, prepared samples, stale/mismatched responses, microphone language, denied permission, delayed callbacks, audio handoff, long transcripts, mobile layout, and navigation. Speech recognition and playback were simulated.
 
-A separate live run attempted 13 cases using synthetic text. [The raw request/result report](live-qa.json) contains four successful randomization responses and nine `429 RATE_LIMITED` failures:
+An earlier fresh GitHub clone passed `npm ci`, example-environment setup, type checking, all 25 then-existing unit tests, and production build. The earlier 11-slide deck and its PDF also passed visual review. These records establish those earlier versions only, not the current integration.
 
-| Successful live randomization locale | Server `elapsedMs` | Result |
+## Current live document observation
+
+An acknowledged synthetic English paragraph completed the real two-call document path in Turkish: HTTP 200, 2,798 ms wall time, 2,658 ms server time. The returned text retained 4 visits, 8 weeks, voluntary participation, and leaving at any time. Its only flag was the review-aid notice. See [the raw document report](documents-live-qa.json). This one observation is not a benchmark or qualified translation review.
+
+## Recorded connected live journey
+
+The current captioned video contains three HTTP 200 live operations: Turkish trial explanation (1,894 ms server time), participant question into English (1,303 ms), and the human-authored English reply into Turkish (1,597 ms). All produced mechanically releasable results; only review-aid notices were present. The video then explicitly switches to the fictional visit-note sample. [Actual responses](integrated-demo-qa.json) are separate from the mocked browser suite. The capture script operates review controls; this is not qualified human approval or evidence that every wording is accurate.
+
+## Actual earlier live observations
+
+All requests used synthetic text. The first Turkish randomization smoke check returned HTTP 200 in 6,385 ms. A separate 13-case trial run produced four successes and nine quota errors in [the original raw report](live-qa.json):
+
+| Successful randomization locale | Server processing time | Result |
 | --- | --- | --- |
-| Turkish `tr-TR` | 28,023 | HTTP 200; `canRelease: true` |
-| Spanish `es-419` | 9,001 | HTTP 200; `canRelease: true` |
-| Portuguese `pt-BR` | 5,434 | HTTP 200; `canRelease: true` |
-| Hindi `hi-IN` | 5,118 | HTTP 200; `canRelease: true` |
+| Turkish | 28,023 ms | HTTP 200; mechanically releasable |
+| Spanish | 9,001 ms | HTTP 200; mechanically releasable |
+| Brazilian Portuguese | 5,434 ms | HTTP 200; mechanically releasable |
+| Hindi | 5,118 ms | HTTP 200; mechanically releasable |
 
-For these four successful requests only, the median server processing time was 7,217.5 ms and the range was approximately 5.1–28.0 seconds. This small, quota-limited run is not a performance benchmark. The earlier 6,385 ms Turkish smoke result is separate and is not included in that four-request statistic.
+That run's quota failures prevented live Mandarin, remaining-section, legacy English-conversation, contradiction, and unspecified-policy coverage. A quota error tests failure mapping, not the translation behavior it interrupted.
 
-Quota prevented successful live coverage of Mandarin randomization, the other five consent sections, the typed conversation, a contradictory conversation, and the unspecified collected-data-policy question. Their nine quota errors verify visible upstream failure mapping, not the translation or review behavior those cases were meant to exercise. Live conversation coverage, real microphone testing, and qualified review of every target language remain pending.
+Two later Turkish Visits calls succeeded: clinician English to Turkish in 7,662 ms wall time and participant Turkish to English in 8,004 ms. The participant's question remained a question in English and the Turkish reverse rendering. See [the visit raw report](visits-live-qa.json).
 
-## Both modes and release gate
+After the project's `gemini-3.8-flash` allowance was exhausted, a two-call `gemini-3.5-flash-lite` participant question succeeded in 1,594 ms. The server default and encrypted Preview configuration now select Flash-Lite. This is one observation, not a benchmark or language validation. None of these earlier calls establishes live coverage of the new note/paste pipeline. See [the Visits account](visits.md#observed-validation) for the recorded model change.
 
-- [ ] Each of the six consent sections retains its original English source and `DEMO-1.0` version.
-- [ ] Each section produces an explicitly labelled sample draft in all five locales, without an API key.
-- [ ] Conversation supports the fixed sample text without a key; other sample text receives an honest error rather than fabricated output.
-- [ ] A draft is visible to the coordinator before it is released to the participant view.
-- [ ] Release requires the coordinator's explicit action. A blocking flag disables release.
-- [ ] A released result matches the current source, mode, locale, and request identity.
-- [ ] Editing the transcript, changing locale, switching sections/modes, or resetting clears old draft/release eligibility as appropriate.
-- [ ] A slower old response cannot overwrite a newer request or appear under another locale.
-- [ ] Empty input, invalid locale, and unknown section return useful errors and cannot release a result.
-- [ ] Repeated send/release actions do not duplicate transcript content or leak old output.
-- [ ] Local visuals correspond to the source and do not imply diagnosis or a confirmed treatment outcome.
+## Integrated document and question flow
 
-## Speech and accessibility
+- [ ] Trial and note sources stay visibly fictional, unchanged, and identifiable.
+- [ ] All six trial sections and all three note paragraphs have labelled samples in five locales without a key.
+- [ ] Each note/paste explanation cites exactly its original paragraph and preserves the entire source.
+- [ ] Paste requires public/fictional-source acknowledgment and 1–4,000 characters; Sample mode refuses arbitrary pasted content.
+- [ ] Unknown, missing, duplicate, or mismatched paragraph references cannot become a released draft.
+- [ ] A draft remains separate from participant output until explicit review and sharing.
+- [ ] The participant can attach a question to a shared paragraph and carry that context to Conversation.
+- [ ] The question stays editable and the app translates it without answering.
+- [ ] A human coordinator supplies the reply, with the same review/share process in the reverse direction.
+- [ ] Navigation preserves session work; refresh/new session clears it as documented.
+- [ ] Display-size changes preserve reviewed wording and release state.
+- [ ] Source/text/language/engine changes cancel or invalidate affected work; an old response cannot reappear.
+- [ ] Glossary definitions cite their source and do not transfer a fixture plan into an unrelated paste.
 
-- [ ] Speech starts only after the user's action and browser permission.
-- [ ] Recognition produces a reviewable transcript; the user can correct it before sending.
-- [ ] Denied microphone permission, unsupported browser recognition, unavailable microphone, and speech-service failure show a useful status while typed input works.
-- [ ] Stopping recognition and resetting leave no unnoticed recording/listening state.
-- [ ] Keyboard navigation reaches modes, sections, language, text entry, send, and release; focus is visible.
-- [ ] The participant pane remains readable on a narrow display and at 200% zoom.
-- [ ] Turkish characters, Hindi and simplified Chinese render without missing glyphs or clipped lines.
-- [ ] Loading and errors have text labels, not color alone.
+## Conversation and speech
 
-## Live engine and failure recovery
+- [ ] Clinician English translates to the selected language, and participant text translates to English.
+- [ ] The shared history contains only explicitly shared turns, except the clearly labelled full prepared fixture.
+- [ ] All eight supported sample turns work; arbitrary sample messages fail honestly.
+- [ ] Microphone recording starts only after a user action and uses the intended speaker language.
+- [ ] Recognized words remain editable before translation.
+- [ ] Long speech remains visible in full, including final negation; translation waits for deliberate shortening below the limit.
+- [ ] A stopped/canceled recorder cannot append delayed words under another speaker or language.
+- [ ] Recording and audio playback stop one another, with stale callbacks ignored.
+- [ ] Missing voices, denied permission, and browser/network failures leave typing available.
+- [ ] No duplicate turn appears after repeated share actions.
+- [ ] Playback reads only shared text with a matching voice, after a click.
 
-- [ ] A live request uses the server key and visibly identifies the live engine.
-- [ ] No API key is present in client bundles, request payloads, browser UI, or committed files.
-- [ ] A missing key produces a visible live-engine error; it never silently substitutes sample output.
-- [ ] A rate-limit / quota response (including HTTP 429 upstream) leaves no new releasable draft and offers retry only when appropriate.
-- [ ] A simulated delay exceeding the 45-second overall budget produces a timeout error and returns control to the user.
-- [ ] Invalid JSON / invalid structured output is rejected and never reaches the participant view.
-- [ ] A failed retry cannot re-release an older draft under new source text.
-- [ ] Source text containing instructions to ignore the task is treated as quoted content, not as model authority.
-- [ ] Questions about the unspecified collected-data policy remain unanswered by the fixture and are directed to the study team.
+## Reliability and accessibility
 
-## Planted errors and critical facts
+- [ ] Empty/invalid inputs, missing key, quota errors, malformed output, canceled calls, and deadlines produce useful errors.
+- [ ] A failed live call never silently falls back to a prepared example or revives an earlier draft.
+- [ ] No key reaches browser payloads, bundles, committed files, or public captures.
+- [ ] A 45-second total server budget applies across both calls.
+- [ ] Pasted instructions remain untrusted source text.
+- [ ] Keyboard navigation and visible focus reach all main actions.
+- [ ] Large text, extra-large text, 200% zoom, and narrow screens keep content usable.
+- [ ] Turkish, Hindi, and Simplified Chinese render without missing glyphs or clipping.
+- [ ] Status and errors use words, not color alone.
+- [ ] A fixed timeline or diagram appears only when the current source supports it.
 
-Use good examples and intentionally altered outputs with a known answer key. Test the check functions directly where available. A manual or test-only alteration is not a model result and must be labelled accordingly in the demo. Record missed errors as limitations; never report an accuracy percentage without a documented denominator.
+## Planted critical facts
 
-| Source fact | Planted error | Expected review outcome | Observed result |
+Label planted outputs as test alterations. Compare the known source with the alteration and record whether automatic checks, a human reviewer, or neither detected it. Do not invent a detection percentage.
+
+| Source | Deliberate alteration | Review target | Observed manual result |
 | --- | --- | --- | --- |
-| 50% chance of either group | 100% or guaranteed investigational tablet | Flag the changed probability or meaning; coordinator must not release | |
-| Neither participant nor researcher chooses | Researcher chooses your group | Flag lost negation/changed assignment; coordinator must not release | |
-| Placebo has no active study drug | Placebo contains the active drug | Flag changed meaning; coordinator must not release | |
-| 4 visits over 8 weeks | 8 visits over 4 weeks | Flag changed numbers/relationships; coordinator must not release | |
-| Approximately 60 minutes | Approximately 6 minutes | Flag altered duration; coordinator must not release | |
-| 5 mL blood sample | 5 mg blood sample or 50 mL | Flag unit/quantity change; coordinator must not release | |
-| Benefit is not guaranteed | You will improve | Flag unsupported certainty; coordinator must not release | |
-| May leave at any time without penalty | May not leave / must pay a penalty | Flag changed withdrawal rights; coordinator must not release | |
-| Collected-data policy unspecified | All prior data will be deleted | Flag unsupported policy; coordinator must not release | |
-| No applicable visual | Unsupported visual value | Schema validation rejects output | |
+| 50% chance of either group | 100% or guaranteed active tablet | Probability and unsupported certainty | Pending |
+| Neither person chooses | Researcher chooses the group | Assignment and negation | Pending |
+| Placebo has no active study drug | Placebo contains active drug | Protected concept | Pending |
+| 4 visits over 8 weeks | 8 visits over 4 weeks | Quantity relationships | Pending |
+| About 60 minutes; 5 mL | 6 minutes; 5 mg or 50 mL | Units and amount | Pending |
+| May leave without penalty | Must stay or pay a penalty | Withdrawal rights | Pending |
+| Collected-data policy unspecified | All prior data will be deleted | Unsupported policy | Pending |
+| Fictional note records 148/94 mmHg | Different pressure/unit | Measurement fidelity | Pending |
+| Note lists 10 mg and 2-/4-week timing | Changed dose, timing, or missing medicine | Source attribution and quantities | Pending |
+| Note states its documented plan | New target, symptom cause, or urgent instruction | Unsupported clinical addition | Pending |
 
-Some meaning changes require human judgment and may evade automatic checks. Distinguish which failures the automated layer detected from which the reviewer detected.
+Automatic checks can miss semantic changes or falsely flag equivalent wording. Human comparison of the target language with the original remains necessary.
 
 ## Human language review
 
-Every language below is pending qualified human review. Turkish team review is also pending; a teammate speaking a language does not by itself constitute medical translation certification.
+| Locale | Trial | Note/paste | Both conversation directions | Reviewer / status |
+| --- | --- | --- | --- | --- |
+| Turkish | Pending | Pending | Pending | Pending |
+| Latin American Spanish | Pending | Pending | Pending | Pending |
+| Brazilian Portuguese | Pending | Pending | Pending | Pending |
+| Hindi | Pending | Pending | Pending | Pending |
+| Mandarin / Simplified Chinese | Pending | Pending | Pending | Pending |
 
-| Locale | Reviewer | Six consent sections | Fixed conversation | Numbers, units, negation and rights | Status |
-| --- | --- | --- | --- | --- | --- |
-| Turkish `tr-TR` | Pending | Pending | Pending | Pending | Pending |
-| Spanish `es-419` | Pending | Pending | Pending | Pending | Pending |
-| Portuguese `pt-BR` | Pending | Pending | Pending | Pending | Pending |
-| Hindi `hi-IN` | Pending | Pending | Pending | Pending | Pending |
-| Mandarin / simplified Chinese `zh-CN` | Pending | Pending | Pending | Pending | Pending |
-
-For each locale, ask a fluent reviewer to compare the target explanation with the source directly, independent of the back-translation. Check natural adult language, preserved uncertainty, accurate placebo/randomization meaning, unchanged numbers and units, and voluntary participation/withdrawal rights. Record corrections and rerun the affected scenarios. Do not mark a locale reviewed on the strength of model self-assessment.
+Ask a fluent reviewer to compare the target text directly with the source, independently of the reverse rendering. Preserve respectful adult language, uncertainty, facts, units, negation, speaker identity, and source attribution. A teammate speaking Turkish does not establish certified medical translation review.
 
 ## Submission review
 
-- [ ] README setup works from a clean clone.
-- [ ] Repository contains the MIT license and excludes secrets and personal data.
-- [ ] Slides and narration accurately distinguish sample output from live Gemini calls.
-- [ ] Slides contain no invented performance, patient outcome, clinical validation, or completed language-review claim.
-- [ ] Record the actual demo video; the HTML deck is not a video.
-- [ ] Confirm current organizer submission fields, prize selection, and deadline before submitting.
+- [ ] Final clean setup and judge access work for this version.
+- [ ] Repository contains MIT and excludes keys, private email screenshots, and patient information.
+- [ ] Final capture includes an actual live segment or explicitly shows its error and labelled sample fallback.
+- [ ] New PDF/video/screenshots describe the integrated version.
+- [ ] AI-assistance provenance and the actual build timeline are accurate.
+- [ ] One track, at most two superlatives, all teammates listed, and all required Devpost fields completed.
+- [ ] Organizer confirmation resolves schedule, AI policy, and any pre-existing-work/cross-prize questions.
+
+See [the verified requirements check](guidelines.md). Use 10 a.m. Eastern on Sunday, October 11 as the conservative build/submission cutoff and prepare for judging by 12:30 p.m. while confirming the conflicting notices on site.

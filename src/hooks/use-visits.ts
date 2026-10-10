@@ -53,7 +53,7 @@ function initialState(liveAvailable: boolean): VisitState {
 function reducer(state: VisitState, action: Action): VisitState {
   switch (action.type) {
     case "draft": return { ...state, ...clearReview, drafts: { ...state.drafts, [action.speaker]: action.text } };
-    case "configure": return { ...state, ...clearReview, locale: action.locale ?? state.locale, engine: action.engine ?? state.engine, drafts: emptyDrafts(), turns: [], sampleCursor: 0 };
+    case "configure": return { ...state, ...clearReview, locale: action.locale ?? state.locale, engine: action.engine ?? state.engine, drafts: action.locale ? emptyDrafts() : state.drafts, turns: [], sampleCursor: 0 };
     case "start": return { ...state, ...clearReview, status: "loading", activeSpeaker: action.speaker, activeRequestId: action.requestId };
     case "success":
       if (state.activeRequestId !== action.result.requestId || state.locale !== action.result.locale || state.engine !== action.result.engine || state.activeSpeaker !== action.result.speaker || state.drafts[action.result.speaker].trim() !== action.result.sourceText) return state;

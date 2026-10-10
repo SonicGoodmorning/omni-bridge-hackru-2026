@@ -1,7 +1,7 @@
-import { Workspace } from "@/components/workspace";
+import { DocumentWorkspace } from "@/components/document-workspace";
 
 export const dynamic = "force-dynamic";
 
 export default function Home() {
-  return <Workspace liveAvailable={Boolean(process.env.GEMINI_API_KEY?.trim())} />;
+  return <DocumentWorkspace />;
 }

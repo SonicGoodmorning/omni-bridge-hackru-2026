@@ -10,8 +10,8 @@ const reviewLabel = "I have reviewed the original, translation, and reverse rend
 async function openVisits(page: Page) {
   await page.goto("/visits");
   await expect(page.locator(".visits-shell")).not.toHaveAttribute("inert", "");
-  await page.getByLabel("Visit translation engine").selectOption("sample");
-  await expect(page.getByLabel("Visit translation engine")).toHaveValue("sample");
+  await page.getByLabel("Explanation engine").selectOption("sample");
+  await expect(page.getByLabel("Explanation engine")).toHaveValue("sample");
 }
 
 async function shareDraft(page: Page) {
@@ -79,7 +79,7 @@ test("prepared conversations are labelled fixtures in all five languages", async
   await openVisits(page);
   const conversation = page.getByRole("region", { name: "Shared conversation", exact: true });
   for (const locale of locales) {
-    await page.getByLabel("Visit participant language").selectOption(locale);
+    await page.getByLabel("Participant preferred language").selectOption(locale);
     await page.getByRole("button", { name: "Open prepared conversation", exact: true }).click();
     const turns = conversation.locator("article");
     await expect(turns).toHaveCount(SAMPLE_VISIT.length);
@@ -133,7 +133,7 @@ test("a delayed answer cannot cross a language change into a new visit", async (
   await page.getByLabel("Clinician message", { exact: true }).fill(clinicianTurn.english);
   await page.getByRole("button", { name: "Translate for participant", exact: true }).click();
   await expect.poll(() => Boolean(complete)).toBe(true);
-  await page.getByLabel("Visit participant language").selectOption("es-419");
+  await page.getByLabel("Participant preferred language").selectOption("es-419");
   complete?.();
   await delivery;
   await expect(page.getByLabel("Clinician message", { exact: true })).toHaveValue("");
@@ -170,7 +170,7 @@ test("microphones use each speaker's language and require an explicit translatio
   await page.evaluate((text) => (window as typeof window & { emitSpeech: (value: string) => void }).emitSpeech(text), clinicianTurn.english);
   await expect(page.getByLabel("Clinician message", { exact: true })).toHaveValue(clinicianTurn.english);
   await expect(page.getByRole("checkbox", { name: reviewLabel, exact: true })).toHaveCount(0);
-  await page.getByLabel("Visit participant language").selectOption("hi-IN");
+  await page.getByLabel("Participant preferred language").selectOption("hi-IN");
   await page.getByRole("button", { name: "Record participant", exact: true }).click();
   await page.evaluate((text) => (window as typeof window & { emitSpeech: (value: string) => void }).emitSpeech(text), participantTurn.text["hi-IN"]);
   await expect(page.getByLabel("Participant message", { exact: true })).toHaveValue(participantTurn.text["hi-IN"]);
@@ -207,8 +207,8 @@ test("reset and language changes discard queued recognition callbacks", async ({
   await openVisits(page);
   for (const change of ["reset", "language"]) {
     await page.getByRole("button", { name: "Record participant", exact: true }).click();
-    if (change === "reset") await page.getByRole("button", { name: "New visit", exact: true }).click();
-    else await page.getByLabel("Visit participant language").selectOption("pt-BR");
+    if (change === "reset") await page.getByRole("button", { name: "New session", exact: true }).click();
+    else await page.getByLabel("Participant preferred language").selectOption("pt-BR");
     await page.getByLabel("Participant message", { exact: true }).fill("Fresh participant source.");
     await page.evaluate(() => (window as typeof window & { emitLateSpeech: () => void }).emitLateSpeech());
     await expect(page.getByLabel("Participant message", { exact: true })).toHaveValue("Fresh participant source.");
@@ -319,7 +319,7 @@ test("mobile visits remain readable without horizontal overflow", async ({ page 
 
 test("the main workspace links to the two-way visits area", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("link", { name: /visits/i }).first().click();
+  await page.getByRole("link", { name: "Conversation", exact: true }).first().click();
   await expect(page).toHaveURL(/\/visits$/);
   await expect(page.getByRole("heading", { name: "A conversation, both ways.", exact: true })).toBeVisible();
 });

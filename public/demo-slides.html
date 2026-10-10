@@ -87,73 +87,76 @@
 </head>
 <body>
   <main class="deck" aria-label="Omni-Bridge presentation">
+
     <section class="slide dark is-active" aria-label="Slide 1 of 11: Omni-Bridge">
-      <p class="eyebrow">HackRU · Fall 2026</p>
+      <p class="eyebrow">HackRU Fall 2026</p>
       <div class="spacer"></div>
       <h1>Omni-Bridge</h1>
-      <p class="lede">Clinical research explained<br>in the participant's language</p>
+      <p class="lede">Understand the trial<br>in your language</p>
+      <p class="quiet" style="margin-top:25px">The document and the next conversation in one session</p>
       <div class="spacer"></div>
-      <div class="footer"><span>Consent guide + conversation bridge</span><span>Fictional study · Research prototype</span></div>
-      <aside class="notes">Introduce the project as a research prototype. Both modes share a human review step. Name the engine you will demonstrate: fixed samples or live Gemini. Do not suggest the fictional study is approved for actual enrollment.</aside>
+      <div class="footer"><span>Source-linked explanations and two-way conversation</span><span>Fictional education prototype</span></div>
+      <aside class="notes">Begin with the fictional CLEAR trial and the participant's question. State whether the current segment uses prepared samples or live Gemini. The outpatient-note example extends the same workflow and does not establish a real clinical integration. This is an AI-assisted prototype, with provenance in docs/guidelines.md.</aside>
     </section>
 
-    <section class="slide" aria-label="Slide 2 of 11: The participant's question">
-      <p class="eyebrow">The participant's question</p>
+    <section class="slide" aria-label="Slide 2 of 11: Understanding a trial">
+      <p class="eyebrow">A fictional participant's question</p>
       <h2>Understanding the choice</h2>
       <p class="quote">“So I will <em>definitely</em><br>get the new medicine?”</p>
-      <p class="body" style="margin-top:32px;max-width:830px">A fluent explanation can still lose uncertainty, placebo assignment, or the right to leave.</p>
+      <p class="body" style="margin-top:32px;max-width:850px">A fluent explanation can still lose uncertainty, placebo assignment, or the right to leave.</p>
       <div class="footer"><span>Illustrative scenario, not a patient quotation</span><span>02</span></div>
-      <aside class="notes">This line is a fictional persona based on the sponsor's Teach It Back starter sheet. Do not call it a real patient quote or imply measured prevalence. Sponsor context: https://drive.google.com/file/d/1_UkzCt6a3uxCefqlm7j7ai7GCYB4Fz5x/view</aside>
+      <aside class="notes">This invented scenario introduces the clinical-trial comprehension problem. It is not a real participant quotation or measured prevalence. Sponsor design references: Teach It Back https://drive.google.com/file/d/1_UkzCt6a3uxCefqlm7j7ai7GCYB4Fz5x/view and Lost In Translation https://drive.google.com/file/d/1Ni32VvTU43TI9U5UYAEROXpuf3_KDJQd/view .</aside>
     </section>
 
-    <section class="slide" aria-label="Slide 3 of 11: Two equal workflows">
-      <p class="eyebrow">One shared workspace</p>
-      <h2>Two equal workflows</h2>
+    <section class="slide" aria-label="Slide 3 of 11: One connected session">
+      <p class="eyebrow">One connected session</p>
+      <h2>The explanation leads<br>to the next question</h2>
       <div class="columns">
-        <div><p class="number">01</p><h3>Consent guide</h3><p class="body">Choose a document section.<br>Explain its meaning in simpler language.</p></div>
-        <div><p class="number">02</p><h3>Conversation bridge</h3><p class="body">Speak or type an explanation.<br>Correct the transcript before sending.</p></div>
+        <div><h3>Document guide</h3><p class="body">Original paragraphs stay attached to reviewed explanations.</p></div>
+        <div><h3>Conversation</h3><p class="body">A participant asks in their language. A human coordinator replies in English.</p></div>
       </div>
-      <p class="quiet" style="margin-top:36px">Both prepare a draft for coordinator review and explicit release.</p>
-      <div class="footer"><span>Original source remains visible</span><span>03</span></div>
-      <aside class="notes">Give each workflow equal time in the demonstration. A document section comes from the local synthetic fixture. Conversation input is reviewed English text, either typed or transcribed. Microphone access is optional.</aside>
+      <p class="quiet" style="margin-top:30px">The source context and language travel with the question.</p>
+      <div class="footer"><span>Shared session in memory</span><span>03</span></div>
+      <aside class="notes">Show navigation within one session. The question carries its paragraph context into the two-way conversation. The app translates the humans' own words and does not generate the clinician's answer. Session state is temporary browser memory, not a clinical record.</aside>
     </section>
 
-    <section class="slide" aria-label="Slide 4 of 11: The CLEAR Study">
-      <p class="eyebrow">Synthetic source material</p>
-      <h2>The CLEAR Study</h2>
+    <section class="slide" aria-label="Slide 4 of 11: Fictional source documents">
+      <p class="eyebrow">Source material</p>
+      <h2>Two fictional documents</h2>
       <div class="columns">
-        <div><h3>CLEAR-026 · DEMO-1.0</h3><p class="body">Investigational tablet compared with placebo.<br><br>No guaranteed health benefit.</p><p class="quiet">October 10, 2026</p></div>
-        <div><p class="body">Study purpose<br>Group assignment<br>Visits and procedures<br>Risks and uncertainties<br>Voluntary participation<br>Leaving the study</p></div>
+        <div><h3>The CLEAR trial</h3><p class="body">Six sections about purpose, randomization, visits, risks, choice, and withdrawal.</p><p class="quiet">The main clinical-trials demonstration</p></div>
+        <div><h3>Outpatient follow-up note</h3><p class="body">An attributed explanation of the note's fictional assessment and documented plan.</p><p class="quiet">The same source-linked workflow</p></div>
       </div>
-      <div class="footer"><span>Six fictional sections · No actual clinical trial</span><span>04</span></div>
-      <aside class="notes">The document is authored as a synthetic fixture in src/lib/study.ts. It is not an IRB-approved form. Point to version DEMO-1.0 and the explicit no-guaranteed-benefit statement. Do not discuss eligibility or a real treatment.</aside>
+      <div class="footer"><span>Synthetic paste also available in live mode, up to 4,000 characters</span><span>04</span></div>
+      <aside class="notes">Sources are authored fixtures in src/lib/study.ts and src/lib/documents/source.ts. The visit note is not a prescription or real record. Pasted source text must be public or fictional English and requires acknowledgment. No OCR, document upload, or EHR connection exists.</aside>
     </section>
 
-    <section class="slide" aria-label="Slide 5 of 11: Consent guide">
-      <p class="eyebrow">Consent guide</p>
-      <h2>One section at a time</h2>
+    <section class="slide" aria-label="Slide 5 of 11: Document review and sharing">
+      <p class="eyebrow">Document guide</p>
+      <h2>Source, draft, review, share</h2>
       <ol class="sequence">
-        <li>Select the source section and participant language</li>
-        <li>Prepare a simpler explanation with its source attached</li>
-        <li>Inspect the target text, back-translation, and flags</li>
-        <li>Release the current draft after coordinator review</li>
+        <li>Read the original section or paragraph</li>
+        <li>Prepare a plain-language explanation</li>
+        <li>Compare the target text, English rendering, and flags</li>
+        <li>Share the exact current draft after review</li>
       </ol>
-      <div class="footer"><span>The tool explains the document; a human conducts consent</span><span>05</span></div>
-      <aside class="notes">Demonstrate randomization. Confirm 50% chance, neither person choosing the group, possible placebo, and no guaranteed benefit. Before release, point out that the patient side has not received the draft. The interface does not collect signatures or grant enrollment.</aside>
+      <div class="footer"><span>The participant sees the shared explanation, with its source attached</span><span>05</span></div>
+      <aside class="notes">Demonstrate CLEAR randomization. Confirm the 50% probability and the fact that neither person chooses the group. Before sharing, show that participant output is empty. Unknown references, stale results, and blocking flags cannot become newly shareable drafts. A human still conducts consent.</aside>
     </section>
 
-    <section class="slide dark" aria-label="Slide 6 of 11: Conversation bridge">
-      <p class="eyebrow">Conversation bridge</p>
-      <h2>Speech with a review step</h2>
-      <p class="quote" style="font-size:48px">Speak. Review the transcript.<br>Send. Review the explanation.<br><em>Then release.</em></p>
-      <p class="quiet" style="margin-top:32px;max-width:870px">Typed input remains available. Browser recognition may use a remote speech service; synthetic demonstrations only.</p>
-      <div class="footer"><span>Source edits and language changes invalidate earlier drafts</span><span>06</span></div>
-      <aside class="notes">Show push-to-talk transcription or paste the fixed conversation. Correct recognition before sending. Native speech recognition is browser-dependent and may process audio remotely. Without a key, only the documented fixed sample conversation is supported. Do not silently substitute it for arbitrary speech.</aside>
+    <section class="slide dark" aria-label="Slide 6 of 11: The participant speaks too">
+      <p class="eyebrow">Two-way conversation</p>
+      <h2>The participant speaks too</h2>
+      <p class="quote" lang="tr" style="font-size:46px;max-width:1000px">“Bu kurgusal çalışmaya<br>katılmak zorunda mıyım?”</p>
+      <p class="body" style="margin-top:24px">“Do I have to participate in this fictional study?”</p>
+      <p class="quiet" style="margin-top:25px">Both people can type or speak. Each translation needs review and sharing.</p>
+      <div class="footer"><span>The human coordinator provides the answer</span><span>06</span></div>
+      <aside class="notes">This Turkish line and its intended English meaning are a scripted example, not a claim about the next model response. Show an actual live question translation and its reverse rendering when quota allows. Preserve the question as a question. Otherwise show the live error and switch explicitly to labelled sample turns. Real microphone behavior must be tested separately from speech mocks.</aside>
     </section>
 
-    <section class="slide" aria-label="Slide 7 of 11: Language choices">
-      <p class="eyebrow">Five target locales</p>
-      <h2>Language choices</h2>
+    <section class="slide" aria-label="Slide 7 of 11: Language and reading preferences">
+      <p class="eyebrow">Language and reading preferences</p>
+      <h2>A readable participant view</h2>
       <div class="languages">
         <div class="language"><strong lang="tr">Türkçe</strong><span>Turkish</span></div>
         <div class="language"><strong lang="es">Español</strong><span>Latin America</span></div>
@@ -161,57 +164,56 @@
         <div class="language"><strong lang="hi">हिन्दी</strong><span>Hindi</span></div>
         <div class="language"><strong lang="zh-CN">简体中文</strong><span>Mandarin</span></div>
       </div>
-      <p class="quiet" style="margin-top:26px">All five need qualified human review. Turkish team review is pending.</p>
-      <div class="footer"><span>Prototype coverage does not establish translation quality</span><span>07</span></div>
-      <aside class="notes">Locales are tr-TR, es-419, pt-BR, hi-IN, and zh-CN. The project has not established certified or clinically validated coverage. Show one language change and the cleared draft. Do not claim completed team review.</aside>
+      <p class="quiet" style="margin-top:24px">Larger text changes the display and preserves reviewed wording.</p>
+      <div class="footer"><span>All five languages need qualified review</span><span>07</span></div>
+      <aside class="notes">The five locales are tr-TR, es-419, pt-BR, hi-IN, and zh-CN. Show Reading preferences without regenerating or rewriting the current explanation. Prototype coverage is not certified translation coverage. No completed qualified language review is claimed.</aside>
     </section>
 
-    <section class="slide" aria-label="Slide 8 of 11: Gemini and coordinator review">
-      <p class="eyebrow">Live engine</p>
-      <h2>Gemini prepares.<br>The coordinator reviews.</h2>
-      <div class="columns" style="margin-top:34px">
-        <div><h3>Two stateless requests</h3><p class="body">Source → target explanation<br><br>Target explanation → English<br><span class="quiet">The second request does not see the original source.</span></p></div>
-        <div><h3>Visible review evidence</h3><p class="body">Source and study version<br>Structured output checks<br>Flags and back-translation<br>Explicit release action</p></div>
+    <section class="slide" aria-label="Slide 8 of 11: Gemini processing">
+      <p class="eyebrow">Live Gemini processing</p>
+      <h2>Two calls, one review step</h2>
+      <div class="columns" style="margin-top:35px">
+        <div><h3>First call</h3><p class="body">Explain source paragraphs or translate a human turn into the target language.</p></div>
+        <div><h3>Fresh second call</h3><p class="body">Render only the generated target text back into the original language.</p></div>
       </div>
-      <div class="footer"><span>The same model can make correlated errors. This is a review aid.</span><span>08</span></div>
-      <aside class="notes">The Next.js server calls Gemini through @google/genai and validates structured output with Zod. The key stays server-side. The live pipeline has a 45-second overall budget. Separate stateless back-translation is not an independent professional translator or proof of medical accuracy.</aside>
+      <p class="quiet" style="margin-top:31px">The second call never receives the original source or conversation history.</p>
+      <div class="footer"><span>The same model can repeat an error. Reverse rendering is a review aid.</span><span>08</span></div>
+      <aside class="notes">The Next.js server calls Gemini through @google/genai and validates structured output with Zod. The model ID is configurable, with current configuration recorded in the repository. The key is server-side. Calls share a 45-second overall deadline. Mechanical checks and reverse rendering do not establish medical accuracy or independent professional review.</aside>
     </section>
 
-    <section class="slide" aria-label="Slide 9 of 11: Critical facts">
-      <p class="eyebrow">Review examples from the fictional study</p>
-      <h2>Critical facts in view</h2>
-      <table class="facts">
-        <tbody>
-          <tr><th>50%</th><td>Chance of either group; neither person chooses</td></tr>
-          <tr><th>4 visits · 8 weeks</th><td>Approximately 60 minutes per visit</td></tr>
-          <tr><th>5 mL</th><td>Blood sample at the first and final visits</td></tr>
-          <tr><th>Your choice</th><td>May leave at any time without penalty</td></tr>
-        </tbody>
-      </table>
-      <div class="footer"><span>Test altered numbers, units, negations, and unsupported promises</span><span>09</span></div>
-      <aside class="notes">These facts come from src/lib/study.ts. Automated flags can miss semantic errors, so compare the target language directly with a qualified reviewer. Acceptance cases are documented in docs/acceptance.md. Do not invent a detection percentage or say all planted errors are detected unless the recorded test evidence supports it.</aside>
+    <section class="slide" aria-label="Slide 9 of 11: Facts and attribution">
+      <p class="eyebrow">Facts and attribution</p>
+      <h2>Meaning must survive</h2>
+      <table class="facts"><tbody>
+        <tr><th>50% chance</th><td>Neither person chooses the trial group</td></tr>
+        <tr><th>4 visits in 8 weeks</th><td>Timing and quantities remain connected</td></tr>
+        <tr><th>Without penalty</th><td>Withdrawal rights retain their negation</td></tr>
+        <tr><th>“The note lists…”</th><td>A documented plan stays attributed to its source</td></tr>
+      </tbody></table>
+      <div class="footer"><span>Flags direct attention and can miss semantic errors</span><span>09</span></div>
+      <aside class="notes">These examples refer to the synthetic study and note fixtures. Review numbers, units, drug names, uncertainty, rights, and whether a statement remains attributed. The outpatient explanation must not introduce treatment targets, diagnoses, symptom explanations, or new instructions. Do not report a detection percentage without an observed answer key and denominator.</aside>
     </section>
 
-    <section class="slide" aria-label="Slide 10 of 11: Prototype boundaries">
-      <p class="eyebrow">Demonstration boundaries</p>
-      <h2>What the prototype establishes</h2>
+    <section class="slide" aria-label="Slide 10 of 11: Demonstration evidence">
+      <p class="eyebrow">Demonstration evidence</p>
+      <h2>Working paths and clear limits</h2>
       <div class="columns">
-        <div><h3>Inspect the workflow</h3><p class="body">Both modes use the same review gate. Fixed samples keep a demo reproducible and visibly separate from live Gemini.</p></div>
-        <div><h3>Further review is needed</h3><p class="body">No clinical validation or measured patient outcomes. No real patient records, signatures, or durable clinical approval.</p></div>
+        <div><h3>Inspect the actual run</h3><p class="body">Visible engine labels.<br>Actual live response or error.<br>Prepared samples as a labelled backup.</p></div>
+        <div><h3>Further review</h3><p class="body">Qualified language review.<br>Real microphone and voice testing.<br>Clinical-deployment assessment.</p></div>
       </div>
-      <p class="quiet" style="margin-top:35px">The original document and human consent discussion remain authoritative.</p>
-      <div class="footer"><span>Open-source prototype · MIT license</span><span>10</span></div>
-      <aside class="notes">The application is a hackathon prototype. Local repository files do not establish a published repository or deployment. Do not claim tests passed unless their actual results are recorded. A demo video must be recorded separately.</aside>
+      <p class="quiet" style="margin-top:30px">Observed latency describes a request. It does not establish a benchmark.</p>
+      <div class="footer"><span>No measured patient outcomes or clinical validation</span><span>10</span></div>
+      <aside class="notes">Report only tests and live requests actually observed for the recorded build. Earlier checks do not certify the later document integration. The prior 1,594 ms Flash-Lite response was one observation. Prepared fixture output must never be narrated as fresh Gemini generation. No accounts, durable clinical approvals, real records, or EHR connections are implemented.</aside>
     </section>
 
-    <section class="slide dark" aria-label="Slide 11 of 11: Next step">
-      <p class="eyebrow">Next step</p>
-      <h2>Review with the people<br>who will use it</h2>
-      <p class="lede">Qualified language reviewers.<br>Research coordinators.<br>Participants in a usability study.</p>
-      <p class="quiet" style="margin-top:30px;max-width:900px">Document missed errors and confusing concepts before expanding into teach-back checks or real study workflows.</p>
+    <section class="slide dark" aria-label="Slide 11 of 11: Open source and next review">
+      <p class="eyebrow">Open source and next review</p>
+      <h2>The source stays central<br>to the conversation</h2>
+      <p class="lede">Review with interpreters and research coordinators.<br>Document missed errors and confusing wording.</p>
+      <p class="quiet" style="margin-top:28px">MIT-licensed source, setup instructions, and AI-assistance disclosure</p>
       <div class="spacer"></div>
-      <div class="footer"><span>Omni-Bridge · HackRU Fall 2026</span><span>11</span></div>
-      <aside class="notes">Close with the development direction, not an invented outcome. Teach-back evaluation and clinical integrations are future work, not implemented features. Sponsor inspiration: Teach It Back and Lost In Translation in the public HackRU Regeneron Starter Kit at https://drive.google.com/drive/folders/1-ap-Ujtxsfm-YwtkCbwYYcTi6hTu5F_o . Regeneron's presentation guidance suggests roughly three minutes of video and 10–12 slides; these are not hard limits.</aside>
+      <div class="footer"><a href="https://github.com/SonicGoodmorning/omni-bridge-hackru-2026">github.com/SonicGoodmorning/omni-bridge-hackru-2026</a><span>11</span></div>
+      <aside class="notes">The repository is public. Early planning used Gemini 3.1 Pro, and Codex assisted implementation, tests, debugging, deployment work, documentation, and presentation drafts. Human owners must review the result. Build-period eligibility and AI-use rules require truthful provenance and organizer confirmation where needed. Sponsor judging guidance: https://docs.google.com/document/d/15uxWxH70wIqqCJw9W6IX4BHoVz4rDBDuj6FSb5GublI/edit . Roughly three minutes and 10–12 slides are suggestions.</aside>
     </section>
   </main>
 
