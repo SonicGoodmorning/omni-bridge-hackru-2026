@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useRef, useState, type ReactNode } from "react";
 import { useBridge } from "@/hooks/use-bridge";
+import { SAMPLE_VISIT } from "@/lib/visits/sample";
+import type { VisitSpeaker } from "@/lib/visits/types";
 import { useVisits } from "@/hooks/use-visits";
 import { useDocuments } from "@/hooks/use-documents";
 import type { Engine, Locale } from "@/lib/types";
@@ -15,6 +17,11 @@ function useSessionController(liveAvailable: boolean) {
   const bridgeController = useBridge(liveAvailable);
   const documentController = useDocuments(liveAvailable);
   const visitController = useVisits(liveAvailable);
+  const [composerSpeaker, setComposerSpeaker] = useState<VisitSpeaker>("clinician");
+  function selectSpeaker(speaker: VisitSpeaker) {
+    if (speaker === composerSpeaker) return;
+    visitController.cancel(); setComposerSpeaker(speaker);
+  }
   const [sourceKind, setSource] = useState<SourceKind>("consent");
   const [textSize, setTextSize] = useState<TextSize>("standard");
   const [sessionEpoch, setEpoch] = useState(0);
@@ -39,6 +46,7 @@ function useSessionController(liveAvailable: boolean) {
   }
   function clearWork() {
     bridgeController.reset(); documentController.reset(); visitController.reset(); clearQuestions();
+    setComposerSpeaker("clinician");
     setDocumentView("source"); documentScroll.current = { source: 0, review: 0, participant: 0 };
     setEpoch((epoch) => epoch + 1);
   }
@@ -48,6 +56,8 @@ function useSessionController(liveAvailable: boolean) {
   }
   function reset() { clearWork(); setSource("consent"); }
   function discussQuestion(text: string, origin: QuestionOrigin) {
+    visitController.cancel();
+    setComposerSpeaker("participant");
     visitController.setDraft("participant", text.trim());
     setQuestionOrigin(origin);
   }
@@ -55,10 +65,10 @@ function useSessionController(liveAvailable: boolean) {
   const bridge = { ...bridgeController, setSection: (id: string) => { if (bridgeController.state.sectionId !== id) clearQuestions(); bridgeController.setSection(id); } };
   const documents = { ...documentController, setText: (text: string) => { if (documentController.state.text !== text) clearQuestions(); documentController.setText(text); } };
   const visits = { ...visitController, setLocale, setEngine,
-    nextSample: () => { setQuestionOrigin(null); setEngine("sample"); visitController.nextSample(); },
-    openPrepared: () => { setQuestionOrigin(null); setEngine("sample"); visitController.openPrepared(); },
+    nextSample: () => { setComposerSpeaker(SAMPLE_VISIT[visitController.state.sampleCursor % SAMPLE_VISIT.length].speaker); setQuestionOrigin(null); setEngine("sample"); visitController.nextSample(); },
+    openPrepared: () => { setComposerSpeaker("clinician"); setQuestionOrigin(null); setEngine("sample"); visitController.openPrepared(); },
   };
-  return { liveAvailable, locale, engine, textSize, setLocale, setEngine, setTextSize,
+  return { liveAvailable, locale, engine, composerSpeaker, selectSpeaker, textSize, setLocale, setEngine, setTextSize,
     sourceKind, setSourceKind, sessionEpoch, reset, bridge, documents, visits,
     questionOrigin, questionDraft, setQuestionDraft, questionParagraph, setQuestionParagraph, discussQuestion,
     documentView, setDocumentView, documentScroll };

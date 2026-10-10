@@ -8,10 +8,16 @@ const locales: Locale[] = ["tr-TR", "es-419", "pt-BR", "hi-IN", "zh-CN"];
 const reviewLabel = "I have reviewed the original, translation, and reverse rendering.";
 
 async function openVisits(page: Page) {
-  await page.goto("/visits");
+  await page.goto("/");
   await expect(page.locator(".visits-shell")).not.toHaveAttribute("inert", "");
   await page.getByLabel("Explanation engine").selectOption("sample");
   await expect(page.getByLabel("Explanation engine")).toHaveValue("sample");
+  await page.getByRole("button", { name: "Try a sample", exact: true }).click();
+}
+
+async function selectSpeaker(page: Page, speaker: "clinician" | "participant") {
+  const button = page.getByRole("group", { name: "Speaking as" }).getByRole("button", { name: speaker === "clinician" ? "Clinician English" : /Participant/, exact: speaker === "clinician" });
+  if (await button.getAttribute("aria-pressed") !== "true") await button.click();
 }
 
 async function shareDraft(page: Page) {
@@ -55,6 +61,7 @@ test("each speaker translates in the correct direction and shares only after rev
   await openVisits(page);
   const conversation = page.getByRole("region", { name: "Shared conversation", exact: true });
   await expect(conversation.locator("article")).toHaveCount(0);
+  await selectSpeaker(page, "clinician");
   await page.getByLabel("Clinician message", { exact: true }).fill(clinicianTurn.english);
   await page.getByRole("button", { name: "Translate for participant", exact: true }).click();
   const share = page.getByRole("button", { name: "Share this turn", exact: true });
@@ -65,6 +72,7 @@ test("each speaker translates in the correct direction and shares only after rev
   await expect(conversation.locator("article[data-speaker='clinician']")).toContainText(clinicianTurn.text["tr-TR"]);
   await expect(conversation.locator("article")).toHaveCount(1);
   await expect(page.getByRole("checkbox", { name: reviewLabel, exact: true })).toHaveCount(0);
+  await selectSpeaker(page, "participant");
   await page.getByLabel("Participant message", { exact: true }).fill(participantTurn.text["tr-TR"]);
   await page.getByRole("button", { name: "Translate for clinician", exact: true }).click();
   await expect(conversation.locator("article")).toHaveCount(1);
@@ -97,6 +105,7 @@ test("sample turns require an explicit send and arbitrary sample input stays an 
   await expect(page.getByLabel("Clinician message", { exact: true })).toHaveValue(clinicianTurn.english);
   await expect(conversation.locator("article")).toHaveCount(0);
   await expect(page.getByRole("checkbox", { name: reviewLabel, exact: true })).toHaveCount(0);
+  await selectSpeaker(page, "participant");
   await page.getByLabel("Participant message", { exact: true }).fill("A made-up utterance outside the fixed samples.");
   await page.getByRole("button", { name: "Translate for clinician", exact: true }).click();
   await expect(page.locator(".error-state")).toContainText(/sample|prepared|prewritten/i);
@@ -107,12 +116,15 @@ test("sample turns require an explicit send and arbitrary sample input stays an 
 test("editing a draft removes its approval while preserving earlier shared turns", async ({ page }) => {
   await openVisits(page);
   const conversation = page.getByRole("region", { name: "Shared conversation", exact: true });
+  await selectSpeaker(page, "clinician");
   await page.getByLabel("Clinician message", { exact: true }).fill(clinicianTurn.english);
   await page.getByRole("button", { name: "Translate for participant", exact: true }).click();
   await shareDraft(page);
+  await selectSpeaker(page, "participant");
   await page.getByLabel("Participant message", { exact: true }).fill(participantTurn.text["tr-TR"]);
   await page.getByRole("button", { name: "Translate for clinician", exact: true }).click();
   await page.getByRole("checkbox", { name: reviewLabel, exact: true }).check();
+  await selectSpeaker(page, "participant");
   await page.getByLabel("Participant message", { exact: true }).fill("Changed source.");
   await expect(page.getByRole("checkbox", { name: reviewLabel, exact: true })).toHaveCount(0);
   await expect(conversation.locator("article")).toHaveCount(1);
@@ -130,6 +142,7 @@ test("a delayed answer cannot cross a language change into a new visit", async (
     await route.fulfill({ response }).catch(() => {});
     delivered?.();
   });
+  await selectSpeaker(page, "clinician");
   await page.getByLabel("Clinician message", { exact: true }).fill(clinicianTurn.english);
   await page.getByRole("button", { name: "Translate for participant", exact: true }).click();
   await expect.poll(() => Boolean(complete)).toBe(true);
@@ -152,9 +165,11 @@ test("editing the other speaker during a request prevents its stale answer from 
     await route.fulfill({ response }).catch(() => {});
     delivered?.();
   });
+  await selectSpeaker(page, "clinician");
   await page.getByLabel("Clinician message", { exact: true }).fill(clinicianTurn.english);
   await page.getByRole("button", { name: "Translate for participant", exact: true }).click();
   await expect.poll(() => Boolean(complete)).toBe(true);
+  await selectSpeaker(page, "participant");
   await page.getByLabel("Participant message", { exact: true }).fill(participantTurn.text["tr-TR"]);
   complete?.();
   await delivery;
@@ -165,12 +180,14 @@ test("editing the other speaker during a request prevents its stale answer from 
 test("microphones use each speaker's language and require an explicit translation action", async ({ page }) => {
   await installSpeechHarness(page);
   await openVisits(page);
+  await selectSpeaker(page, "clinician");
   await page.getByRole("button", { name: "Record clinician", exact: true }).click();
   await expect(page.getByRole("button", { name: "Translate for participant", exact: true })).toBeDisabled();
   await page.evaluate((text) => (window as typeof window & { emitSpeech: (value: string) => void }).emitSpeech(text), clinicianTurn.english);
   await expect(page.getByLabel("Clinician message", { exact: true })).toHaveValue(clinicianTurn.english);
   await expect(page.getByRole("checkbox", { name: reviewLabel, exact: true })).toHaveCount(0);
   await page.getByLabel("Participant preferred language").selectOption("hi-IN");
+  await selectSpeaker(page, "participant");
   await page.getByRole("button", { name: "Record participant", exact: true }).click();
   await page.evaluate((text) => (window as typeof window & { emitSpeech: (value: string) => void }).emitSpeech(text), participantTurn.text["hi-IN"]);
   await expect(page.getByLabel("Participant message", { exact: true })).toHaveValue(participantTurn.text["hi-IN"]);
@@ -188,6 +205,7 @@ test("overlong recognized speech keeps its final words and requires a deliberate
   const recognized = `${"Synthetic practice sentence. ".repeat(150)}Do not change the plan.`;
   expect(recognized.length).toBeGreaterThan(4000);
   for (const speaker of ["clinician", "participant"] as const) {
+    await selectSpeaker(page, speaker);
     await page.getByRole("button", { name: `Record ${speaker}`, exact: true }).click();
     await page.evaluate((text) => (window as typeof window & { emitSpeech: (value: string) => void }).emitSpeech(text), recognized);
     const composer = page.getByRole("region", { name: speaker === "clinician" ? "Clinician speaking" : "Participant speaking", exact: true });
@@ -206,12 +224,15 @@ test("reset and language changes discard queued recognition callbacks", async ({
   await installSpeechHarness(page);
   await openVisits(page);
   for (const change of ["reset", "language"]) {
+  await selectSpeaker(page, "participant");
     await page.getByRole("button", { name: "Record participant", exact: true }).click();
-    if (change === "reset") await page.getByRole("button", { name: "New session", exact: true }).click();
+    if (change === "reset") { await page.getByRole("button", { name: "Menu", exact: true }).click(); await page.getByRole("button", { name: "New session", exact: true }).click(); }
     else await page.getByLabel("Participant preferred language").selectOption("pt-BR");
+  await selectSpeaker(page, "participant");
     await page.getByLabel("Participant message", { exact: true }).fill("Fresh participant source.");
     await page.evaluate(() => (window as typeof window & { emitLateSpeech: () => void }).emitLateSpeech());
     await expect(page.getByLabel("Participant message", { exact: true })).toHaveValue("Fresh participant source.");
+    await selectSpeaker(page, "clinician");
     await expect(page.getByLabel("Clinician message", { exact: true })).toHaveValue("");
   }
 });
@@ -219,30 +240,37 @@ test("reset and language changes discard queued recognition callbacks", async ({
 test("a completed clinician recording cannot leak into the next participant recording", async ({ page }) => {
   await installSpeechHarness(page);
   await openVisits(page);
+  await selectSpeaker(page, "clinician");
   await page.getByRole("button", { name: "Record clinician", exact: true }).click();
   await page.getByRole("button", { name: "Stop recording", exact: true }).click();
+  await selectSpeaker(page, "participant");
   await page.getByRole("button", { name: "Record participant", exact: true }).click();
   await page.evaluate(() => (window as typeof window & { queuedSpeechResults: (() => void)[] }).queuedSpeechResults[0]());
-  await expect(page.getByLabel("Clinician message", { exact: true })).toHaveValue("");
   await expect(page.getByLabel("Participant message", { exact: true })).toHaveValue("");
   await page.evaluate((text) => (window as typeof window & { emitSpeech: (value: string) => void }).emitSpeech(text), participantTurn.text["tr-TR"]);
   await expect(page.getByLabel("Participant message", { exact: true })).toHaveValue(participantTurn.text["tr-TR"]);
+  await selectSpeaker(page, "clinician");
+  await expect(page.getByLabel("Clinician message", { exact: true })).toHaveValue("");
 });
 
 test("denied microphone permission leaves both typed paths usable", async ({ page }) => {
   await installSpeechHarness(page, true);
   await openVisits(page);
+  await selectSpeaker(page, "participant");
   await page.getByRole("button", { name: "Record participant", exact: true }).click();
   await expect(page.locator(".inline-error")).toContainText("permission was denied");
+  await selectSpeaker(page, "participant");
   await page.getByLabel("Participant message", { exact: true }).fill(participantTurn.text["tr-TR"]);
   await page.getByRole("button", { name: "Translate for clinician", exact: true }).click();
   await shareDraft(page);
   await expect(page.getByRole("region", { name: "Shared conversation", exact: true })).toContainText(participantTurn.english);
+  await selectSpeaker(page, "clinician");
   await expect(page.getByLabel("Clinician message", { exact: true })).toBeEditable();
 });
 
 test("failed and malformed visit responses never create a shareable turn", async ({ page }) => {
   await openVisits(page);
+  await selectSpeaker(page, "participant");
   await page.getByLabel("Participant message", { exact: true }).fill(participantTurn.text["tr-TR"]);
   await page.route("**/api/visits", (route) => route.fulfill({ status: 429, json: { error: { code: "RATE_LIMITED", message: "Visit quota exhausted. Please retry.", retryable: true } } }));
   await page.getByRole("button", { name: "Translate for clinician", exact: true }).click();
@@ -298,6 +326,7 @@ test("audio reads only shared translations and safely hands off between turns an
     first.onend?.();
   });
   await expect(page.getByRole("button", { name: "Stop audio for turn 2", exact: true })).toBeVisible();
+  await selectSpeaker(page, "clinician");
   await page.getByRole("button", { name: "Record clinician", exact: true }).click();
   await expect(page.getByRole("button", { name: "Stop audio for turn 2", exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Stop recording", exact: true })).toBeVisible();
@@ -310,7 +339,7 @@ test("audio reads only shared translations and safely hands off between turns an
 test("mobile visits remain readable without horizontal overflow", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openVisits(page);
-  await expect(page.getByRole("heading", { name: "A conversation, both ways.", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Conversation", exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole("button", { name: "Open prepared conversation", exact: true }).click();
   await expect(page.getByRole("region", { name: "Shared conversation", exact: true }).locator("article")).toHaveCount(SAMPLE_VISIT.length);
@@ -318,10 +347,10 @@ test("mobile visits remain readable without horizontal overflow", async ({ page 
 });
 
 test("the main workspace links to the two-way visits area", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/visits");
   await page.getByRole("link", { name: "Conversation", exact: true }).first().click();
-  await expect(page).toHaveURL(/\/visits$/);
-  await expect(page.getByRole("heading", { name: "A conversation, both ways.", exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("heading", { name: "Conversation", exact: true })).toBeVisible();
 });
 
 test("visit API enforces speaker direction and returns uncached sample data", async ({ request }) => {

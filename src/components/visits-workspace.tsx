@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ParticipantDisplay, ReviewPanel } from "./conversation-panels";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/icons";
 import { useSpeech } from "@/hooks/use-speech";
@@ -43,8 +44,13 @@ export function VisitsWorkspace() {
   const { state } = controller;
   const stateRef = useRef(state);
   stateRef.current = state;
+  const historyPane = useRef<HTMLElement | null>(null);
   const [ready, setReady] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
+  const [samplesOpen, setSamplesOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(true);
+  const [displayOpen, setDisplayOpen] = useState(false);
+  const selectedSpeaker = session.composerSpeaker;
+  const selectedSpeakerRef = useRef(selectedSpeaker); selectedSpeakerRef.current = selectedSpeaker;
   const [recordingSpeaker, setRecordingSpeaker] = useState<VisitSpeaker | null>(null);
   const speechContext = useRef<{ speaker: VisitSpeaker; locale: Locale } | null>(null);
   const [playbackAvailable, setPlaybackAvailable] = useState(false);
@@ -57,7 +63,7 @@ export function VisitsWorkspace() {
 
   const onTranscript = useCallback((text: string) => {
     const context = speechContext.current;
-    if (!context || stateRef.current.locale !== context.locale) return;
+    if (!context || stateRef.current.locale !== context.locale || context.speaker !== selectedSpeakerRef.current) return;
     const current = stateRef.current.drafts[context.speaker];
     controller.setDraft(context.speaker, `${current.trim()} ${text.trim()}`.trim());
   }, [controller.setDraft]);
@@ -89,7 +95,7 @@ export function VisitsWorkspace() {
     setPlaybackMessage("");
   // Global resets and settings also invalidate browser audio sessions.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session.sessionEpoch]);
+  }, [session.sessionEpoch, selectedSpeaker]);
 
   function record(speaker: VisitSpeaker) {
     if (speech.isListening) { speech.stop(); return; }
@@ -141,23 +147,27 @@ export function VisitsWorkspace() {
   const targetName = result ? languageName(result.targetLanguage) : language.nativeName;
   const preparedOnly = state.turns.length > 0 && state.turns.every((turn) => turn.prepared);
 
+  useEffect(() => { if (busy || state.error || state.result) setReviewOpen(true); }, [busy, state.error, state.result?.requestId]);
+  useEffect(() => { if (!state.turns.length) setDisplayOpen(false);
+    const pane = historyPane.current; if (pane) pane.scrollTop = pane.scrollHeight;
+  }, [state.turns.length]);
+
   return <div className="visits-shell" inert={!ready}>
-      {helpOpen && <section className="help-panel visit-help"><div><strong>Both voices stay visible.</strong><p>Review each turn before sharing. Use fictional or public demo text only. Work stays in session memory when you move to Document guide; reset or refresh clears it. Live text goes to Gemini, and browser speech may use a remote service.</p></div><button className="icon-button" aria-label="Close visit information" onClick={() => setHelpOpen(false)}><Icon name="close" /></button></section>}
-      <main className="visits-main">
-
-        <div className="visit-introduction"><div><div className="eyebrow">TWO-WAY CONVERSATION <span>·</span> SYNTHETIC PRACTICE</div><h1>A conversation, both ways.</h1><p>The clinician speaks English. The participant speaks {language.nativeName}. Each turn is reviewed before sharing.</p></div><span className="visit-pair-label"><span>EN</span><Icon name="bridge" size={24} /><span>{language.short}</span></span></div>
-
-        {session.questionOrigin && <aside className="question-origin" aria-label="Question source"><div><span className="eyebrow">FROM DOCUMENT GUIDE</span><strong>{session.questionOrigin.title}</strong><blockquote>{session.questionOrigin.quote}</blockquote></div><Link className="text-button" onClick={() => session.setDocumentView("source")} href={`/#source-${session.questionOrigin.paragraphId}`}>Return to source<Icon name="arrow" size={14} /></Link><p>The participant can edit this question. Translate it here for human discussion; the app does not answer it.</p></aside>}
-        <div className="visit-sample-bar"><div><Icon name="document" size={17} /><span><strong>Try the fictional CLEAR visit</strong><small>{SAMPLE_VISIT.length} prepared turns. No live model calls in sample mode.</small></span></div><div className="visit-sample-actions"><button className="text-button" onClick={useNextSample}>Use next sample turn <span className="visit-sample-count">{state.sampleCursor % SAMPLE_VISIT.length + 1}/{SAMPLE_VISIT.length}</span><Icon name="arrow" size={14} /></button><button className="text-button" onClick={openPrepared}>Open prepared conversation</button></div></div>
-
+      <main className={`visits-main ${reviewOpen && (busy || state.error || result) ? "has-review" : ""}`}>
+        <div className="conversation-heading"><div><p className="eyebrow">ENGLISH ↔ {language.nativeName}</p><h1>Conversation</h1></div><div className="conversation-heading-actions"><button className="text-button" aria-expanded={samplesOpen} onClick={() => setSamplesOpen(!samplesOpen)}>Try a sample</button><button className="text-button" disabled={!state.turns.length} onClick={() => { cancelRecording(); stopPlayback(); setDisplayOpen(true); }}>Participant display</button></div></div>
+        {session.questionOrigin && <aside className="question-origin" aria-label="Question source"><details><summary>{session.questionOrigin.title} · Question source</summary><blockquote>{session.questionOrigin.quote}</blockquote><p>A person answers this question; Omni-Bridge translates.</p></details><Link className="text-button" onClick={() => session.setDocumentView("source")} href={`/documents#source-${session.questionOrigin.paragraphId}`}>Return to source<Icon name="arrow" size={14} /></Link></aside>}
+        {samplesOpen && <div className="visit-sample-bar"><div><Icon name="document" size={17} /><span><strong>Fictional CLEAR conversation</strong><small>{SAMPLE_VISIT.length} prepared turns. Selecting a sample switches the engine to Sample mode.</small></span></div><div className="visit-sample-actions"><button className="text-button" onClick={useNextSample}>Use next sample turn <span className="visit-sample-count">{state.sampleCursor % SAMPLE_VISIT.length + 1}/{SAMPLE_VISIT.length}</span><Icon name="arrow" size={14} /></button><button className="text-button" onClick={openPrepared}>Open prepared conversation</button><small>Loading the full example replaces the shared conversation.</small></div></div>}
+        <div className="conversation-layout">
         <div className="visit-speakers">
-          {(["clinician", "participant"] as const).map((speaker) => {
+          <div className="composer-switch" role="group" aria-label="Speaking as">{(["clinician", "participant"] as const).map((role) => <button key={role} aria-pressed={selectedSpeaker === role} onClick={() => { if (role !== selectedSpeaker) { cancelRecording(); stopPlayback(); session.selectSpeaker(role); } }}>{role === "clinician" ? "Clinician" : "Participant"}<span>{role === "clinician" ? "English" : language.nativeName}</span></button>)}</div>
+
+          {[selectedSpeaker].map((speaker) => {
             const participant = speaker === "participant";
             const listening = speech.isListening && recordingSpeaker === speaker;
             const pending = busy && state.activeSpeaker === speaker;
             return <section className={`visit-composer ${speaker}`} key={speaker} aria-label={participant ? "Participant speaking" : "Clinician speaking"}>
-              <div className="visit-role-heading"><SpeakerGlyph speaker={speaker} /><div><div className="eyebrow">{participant ? "PARTICIPANT" : "CLINICIAN"}<span>· {participant ? language.nativeName : "English"}</span></div><h2 lang={participant ? state.locale : "en"}>{participant ? localized.title : "Your turn to explain"}</h2></div><span className={`visit-speaking-state ${listening ? "active" : ""}`}>{listening ? "Listening" : participant ? `${language.short} → EN` : `EN → ${language.short}`}</span></div>
-              <p className="visit-composer-description" lang={participant ? state.locale : "en"}>{participant ? localized.description : "Say or type your explanation, then check the words before translating."}</p>
+              <div className="visit-role-heading"><SpeakerGlyph speaker={speaker} /><div><div className="eyebrow">{participant ? "PARTICIPANT" : "CLINICIAN"}<span>· {participant ? language.nativeName : "English"}</span></div><h2 lang={participant ? state.locale : "en"}>{participant ? localized.title : "Your message"}</h2></div><span className={`visit-speaking-state ${listening ? "active" : ""}`}>{listening ? "Listening" : participant ? `${language.short} → EN` : `EN → ${language.short}`}</span></div>
+              <p className="visit-composer-description" lang={participant ? state.locale : "en"}>{participant ? localized.description : "Speak or type, check your words, then translate."}</p>
               <label className="sr-only" htmlFor={`visit-${speaker}-text`}>{participant ? "Participant message" : "Clinician message"}</label>
               <textarea id={`visit-${speaker}-text`} value={state.drafts[speaker]} readOnly={speech.isListening} onChange={(event) => controller.setDraft(speaker, event.target.value)} maxLength={4000} lang={participant ? state.locale : "en"} placeholder={participant ? localized.placeholder : "Type an explanation or ask the participant a question…"} aria-describedby={`visit-${speaker}-hint`} />
               <div className="visit-input-footer"><span>{state.drafts[speaker].length.toLocaleString()} / 4,000</span>{state.drafts[speaker] && <button className="text-button" disabled={speech.isListening} onClick={() => controller.setDraft(speaker, "")} lang={participant ? state.locale : "en"}>{participant ? patientActions[state.locale].clear : "Clear"}</button>}</div>
@@ -170,7 +180,7 @@ export function VisitsWorkspace() {
           })}
         </div>
 
-        {(busy || state.error || result) && <section className="visit-review" aria-labelledby="visit-review-heading" aria-busy={busy}>
+        {reviewOpen && (busy || state.error || result) && <ReviewPanel onDismiss={() => setReviewOpen(false)}><section className="visit-review" aria-labelledby="visit-review-heading" aria-busy={busy}>
           <div className="visit-section-heading"><h2 id="visit-review-heading"><Icon name="eye" size={18} />Review this turn</h2><span>Only shared turns enter the conversation.</span></div>
           {busy ? <div className="visit-loading" role="status"><span className="spinner" /><p>Translating, then making a separate reverse rendering for review.</p><button className="text-button" onClick={controller.cancel}>Cancel translation</button></div> : state.error ? <div className="error-state" role="alert"><Icon name="warning" size={20} /><div><strong>This turn has not been shared.</strong><p>{state.error}</p><button className="text-button" onClick={() => state.activeSpeaker && void controller.translate(state.activeSpeaker)}>Try translation again<Icon name="arrow" size={14} /></button></div></div> : result ? <div className="visit-review-content">
             <div className="visit-review-direction"><span>{result.speaker === "clinician" ? "Clinician" : "Participant"} <Icon name="arrow" size={13} /> {result.speaker === "clinician" ? "Participant" : "Clinician"}</span><span className={`result-engine ${result.engine === "sample" ? "sample" : ""}`}>{result.engine === "sample" ? "Prepared sample" : `Gemini · ${(result.elapsedMs / 1000).toFixed(1)}s`}</span></div>
@@ -181,15 +191,18 @@ export function VisitsWorkspace() {
             <div className="visit-share-row"><label className="review-confirmation"><input type="checkbox" aria-label="I have reviewed the original, translation, and reverse rendering." checked={state.reviewConfirmed} disabled={!result.canRelease} onChange={(event) => controller.setReviewConfirmed(event.target.checked)} /><span lang={result.speaker === "participant" ? state.locale : "en"}>{result.speaker === "participant" ? <>{patientActions[state.locale].review}<small className="visit-english-aid">I have reviewed the original, translation, and reverse rendering.</small></> : "I have reviewed the original, translation, and reverse rendering."}</span></label><button className="primary-button" aria-label="Share this turn" disabled={!state.reviewConfirmed || !result.canRelease} onClick={controller.share}><span lang={result.speaker === "participant" ? state.locale : "en"}>{result.speaker === "participant" ? patientActions[state.locale].share : "Share this turn"}</span><Icon name="arrow" size={16} /></button></div>
             {!result.canRelease && <p className="inline-error">This turn has a blocking review note and cannot be shared. Edit the original and try again.</p>}
           </div> : null}
-        </section>}
+        </section></ReviewPanel>}
+        {!reviewOpen && (busy || state.error || result) && <button className="text-button reopen-review" onClick={() => setReviewOpen(true)}>Review draft</button>}
 
-        <section className="visit-conversation" aria-label="Shared conversation">
+        <section ref={historyPane} className="visit-conversation" aria-label="Shared conversation">
           <div className="visit-section-heading"><div><h2>Shared conversation</h2><p lang={state.locale}>{localized.shared}</p></div><span>{state.turns.length === 0 ? "Nothing shared yet" : `${state.turns.length} ${state.turns.length === 1 ? "turn" : "turns"}`}</span></div>
           {preparedOnly && <p className="visit-prepared-notice"><Icon name="eye" size={16} />Prepared sample conversation. These {SAMPLE_VISIT.length} fixture turns were loaded together; no live translation or individual review took place.</p>}
-          {state.turns.length === 0 ? <div className="visit-conversation-empty"><div className="visit-empty-line"><SpeakerGlyph speaker="clinician" /><span /><SpeakerGlyph speaker="participant" /></div><h3>Two voices. One conversation.</h3><p>Translate a message above, review its wording, and share it here.<br />Each turn keeps the speaker’s original words alongside the translation.</p></div> : <ol className="visit-turns">{state.turns.map((turn, index) => <li key={turn.id}><article className={`visit-turn ${turn.speaker}`} data-speaker={turn.speaker} data-prepared={turn.prepared ? "true" : "false"}><div className="visit-turn-heading"><span><SpeakerGlyph speaker={turn.speaker} /><strong>{turn.speaker === "clinician" ? "Clinician" : "Participant"}</strong><small>TURN {String(index + 1).padStart(2, "0")}</small></span><span className="visit-turn-status">{turn.prepared ? "Prepared sample" : turn.engine === "sample" ? "Reviewed sample" : "Reviewed & shared"}</span></div><div className="visit-turn-texts"><div><div className="eyebrow">ORIGINAL · {languageName(turn.sourceLanguage)}</div><p lang={turn.sourceLanguage}>{turn.sourceText}</p></div><div><div className="eyebrow">TRANSLATION · {languageName(turn.targetLanguage)}</div><p lang={turn.targetLanguage}>{turn.translation}</p></div></div><div className="visit-turn-actions"><span><Icon name="arrow" size={12} />{turn.speaker === "clinician" ? "For participant" : "For clinician"}</span><button className="text-button" aria-label={`${playingId === turn.id ? "Stop audio for" : "Listen to translation of"} turn ${index + 1}`} disabled={!playbackAvailable} onClick={() => listen(turn)}>{playingId === turn.id ? <Icon name="stop" size={14} /> : <ListenGlyph />}{playingId === turn.id ? "Stop audio" : "Listen"}</button></div></article></li>)}</ol>}
+          {state.turns.length === 0 ? <div className="visit-conversation-empty"><div className="visit-empty-line"><SpeakerGlyph speaker="clinician" /><span /><SpeakerGlyph speaker="participant" /></div><h3>Start with either voice.</h3><p>Choose who is speaking, type or speak a message, then translate.<br />Only reviewed and shared turns appear here.</p></div> : <ol className="visit-turns">{state.turns.map((turn, index) => <li key={turn.id}><article className={`visit-turn ${turn.speaker}`} data-speaker={turn.speaker} data-prepared={turn.prepared ? "true" : "false"}><div className="visit-turn-heading"><span><SpeakerGlyph speaker={turn.speaker} /><strong>{turn.speaker === "clinician" ? "Clinician" : "Participant"}</strong><small>TURN {String(index + 1).padStart(2, "0")}</small></span><span className="visit-turn-status">{turn.prepared ? "Prepared sample" : turn.engine === "sample" ? "Reviewed sample" : "Live Gemini · Shared"}</span></div><div className="visit-turn-texts"><div><div className="eyebrow">ORIGINAL · {languageName(turn.sourceLanguage)}</div><p lang={turn.sourceLanguage}>{turn.sourceText}</p></div><div><div className="eyebrow">TRANSLATION · {languageName(turn.targetLanguage)}</div><p lang={turn.targetLanguage}>{turn.translation}</p></div></div><div className="visit-turn-actions"><span><Icon name="arrow" size={12} />{turn.speaker === "clinician" ? "For participant" : "For clinician"}</span><button className="text-button" aria-label={`${playingId === turn.id ? "Stop audio for" : "Listen to translation of"} turn ${index + 1}`} disabled={!playbackAvailable} onClick={() => listen(turn)}>{playingId === turn.id ? <Icon name="stop" size={14} /> : <ListenGlyph />}{playingId === turn.id ? "Stop audio" : "Listen"}</button></div></article></li>)}</ol>}
           {playbackMessage && <p className="visit-audio-message" role="status">{playbackMessage}</p>}
         </section>
-        <footer className="visit-footer"><span><Icon name="help" size={14} />Synthetic education prototype · No real patient information</span><button className="text-button" onClick={() => setHelpOpen(!helpOpen)}>Privacy & limitations</button><span>Turns stay in this session until you reset or refresh.</span></footer>
+        </div>
+        <footer className="visit-footer"><span><Icon name="help" size={14} />Synthetic education prototype · No real patient information</span><span>Review each translation before sharing.</span><span>Turns stay in this session until you reset or refresh.</span></footer>
       </main>
+      {displayOpen && state.turns.length > 0 && <ParticipantDisplay turns={state.turns} locale={state.locale} onDismiss={() => setDisplayOpen(false)} />}
   </div>;
 }

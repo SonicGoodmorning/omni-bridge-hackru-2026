@@ -136,7 +136,7 @@ export function DocumentWorkspace() {
   function discuss() {
     if (!questionDraft.trim() || !currentParagraph) return;
     session.discussQuestion(questionDraft.trim(), { title: sourceTitle, paragraphId: currentParagraph.id, quote: currentParagraph.text });
-    router.push("/visits");
+    router.push("/");
   }
 
   async function copy() {

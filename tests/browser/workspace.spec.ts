@@ -28,7 +28,7 @@ function liveResult(payload: DocumentRequest): DocumentResult {
   };
 }
 test.beforeEach(async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/documents");
   await expect(page.locator(".shared-app")).not.toHaveAttribute("inert", "");
   await page.getByLabel("Explanation engine").selectOption("sample");
 });
@@ -83,42 +83,47 @@ test("document, selected question paragraph and shared conversation persist acro
   await page.getByRole("button", { name: "Use question: Can you explain this part?", exact: true }).click();
   const question = await page.getByLabel("Participant question", { exact: true }).inputValue();
   await page.getByRole("button", { name: "Discuss this question", exact: true }).click();
-  await expect(page).toHaveURL(/\/visits$/);
+  await expect(page).toHaveURL(/\/$/);
   await expect(page.getByLabel("Participant message", { exact: true })).toHaveValue(question);
   await expect(page.getByRole("complementary", { name: "Question source", exact: true })).toContainText("lisinopril 10 mg");
   await expect(page.getByRole("region", { name: "Shared conversation", exact: true }).locator("article")).toHaveCount(0);
-  await page.getByRole("link", { name: "Document guide", exact: true }).click();
+  await page.getByRole("link", { name: "Documents", exact: true }).click();
   await expect(page.locator(".doc-participant-block")).toHaveCount(3);
   await expect(page.getByLabel("Question source paragraph", { exact: true })).toHaveValue("visit-plan");
   await expect(page.getByLabel("Participant question", { exact: true })).toHaveValue(question);
   await page.getByRole("link", { name: "Conversation", exact: true }).click();
+  await page.getByRole("button", { name: "Try a sample", exact: true }).click();
   await page.getByRole("button", { name: "Open prepared conversation", exact: true }).click();
   await expect(page.getByRole("region", { name: "Shared conversation", exact: true }).locator("article")).toHaveCount(8);
-  await page.getByRole("link", { name: "Document guide", exact: true }).click();
+  await page.getByRole("link", { name: "Documents", exact: true }).click();
   await page.getByRole("link", { name: "Conversation", exact: true }).click();
   await expect(page.getByRole("region", { name: "Shared conversation", exact: true }).locator("article")).toHaveCount(8);
 });
 
 test("reset and source changes clear work while preserving language and reading preferences", async ({ page }) => {
   await page.getByLabel("Participant preferred language").selectOption("pt-BR");
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
   await page.getByRole("button", { name: "Reading preferences", exact: true }).click();
   await page.getByLabel("Text size", { exact: true }).selectOption("extra-large");
   await page.getByRole("button", { name: "Done", exact: true }).click();
   await page.getByRole("button", { name: "Prepare explanation", exact: true }).click();
   await shareDocument(page);
   await page.getByRole("link", { name: "Conversation", exact: true }).click();
+  await page.getByRole("button", { name: "Try a sample", exact: true }).click();
   await page.getByRole("button", { name: "Open prepared conversation", exact: true }).click();
-  await page.getByRole("link", { name: "Document guide", exact: true }).click();
+  await page.getByRole("link", { name: "Documents", exact: true }).click();
   await page.getByLabel("Document source", { exact: true }).selectOption("visit-summary");
   await expect(page.locator(".doc-participant-block")).toHaveCount(0);
   await page.getByRole("link", { name: "Conversation", exact: true }).click();
   await expect(page.getByRole("region", { name: "Shared conversation", exact: true }).locator("article")).toHaveCount(0);
+  await page.getByRole("button", { name: "Try a sample", exact: true }).click();
   await page.getByRole("button", { name: "Open prepared conversation", exact: true }).click();
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
   await page.getByRole("button", { name: "New session", exact: true }).click();
   await expect(page.getByLabel("Participant preferred language")).toHaveValue("pt-BR");
   await expect(page.locator(".shared-app")).toHaveClass(/text-size-extra-large/);
   await expect(page.getByRole("region", { name: "Shared conversation", exact: true }).locator("article")).toHaveCount(0);
-  await page.getByRole("link", { name: "Document guide", exact: true }).click();
+  await page.getByRole("link", { name: "Documents", exact: true }).click();
   await expect(page.getByLabel("Document source", { exact: true })).toHaveValue("consent");
 });
 
@@ -138,7 +143,7 @@ test("a sample document question survives switching to live and is sent only on 
   await expect(page.getByLabel("Participant message", { exact: true })).toHaveValue(question);
   await expect(page.getByRole("complementary", { name: "Question source", exact: true })).toContainText("50% chance");
   expect(requests).toBe(0);
-  await page.getByRole("link", { name: "Document guide", exact: true }).click();
+  await page.getByRole("link", { name: "Documents", exact: true }).click();
   await expect(page.getByLabel("Participant question", { exact: true })).toHaveValue(question);
   await page.getByRole("link", { name: "Conversation", exact: true }).click();
   await page.getByRole("button", { name: "Translate for clinician", exact: true }).click();
@@ -153,6 +158,7 @@ test("reading size retains the exact shared draft and performs no model request"
   const text = await page.locator(".doc-released").textContent();
   let requests = 0;
   page.on("request", (request) => { if (/\/api\/(?:bridge|documents)$/.test(request.url())) requests += 1; });
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
   await page.getByRole("button", { name: "Reading preferences", exact: true }).click();
   await page.getByLabel("Text size", { exact: true }).selectOption("large");
   await page.getByRole("button", { name: "Done", exact: true }).click();
