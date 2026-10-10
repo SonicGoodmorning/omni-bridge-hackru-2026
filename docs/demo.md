@@ -41,4 +41,4 @@ Speech recognition can change punctuation or numerals. Review and correct the te
 
 ## Deliverables
 
-The local HTML presentation has 11 slides and can print to a landscape PDF. A demo video must still be recorded. Before submission, verify the current organizer form and sponsor requirements, include a reproducible repository, and remove all credentials and personal material. Regeneron describes a roughly three-minute video and 10–12-slide deck as suggested lengths, not hard limits.
+The local HTML presentation has 11 slides, with an exported PDF included. The [silent, captioned walkthrough](demo.webm) lasts 3 minutes and 0.68 seconds and demonstrates fixed Prepared sample output and the review/release workflow. It does not show live Gemini generation or validate real microphone behavior; actual live requests are documented in [the QA report](live-qa.json). Before submission, verify the current organizer form and sponsor requirements, include a reproducible repository, and remove all credentials and personal material. Regeneron describes a roughly three-minute video and 10–12-slide deck as suggested lengths, not hard limits.

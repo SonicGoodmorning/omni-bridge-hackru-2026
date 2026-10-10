@@ -12,7 +12,7 @@ Use synthetic data and consenting teammates. Check a box only after the test is 
 | `npm run test:e2e` | 10 browser tests passed | October 10, 2026; implementation run reported by the root agent |
 | HTML presentation layout | 11 slides checked; no overflow observed | October 10, 2026; browser review reported by the root agent |
 | Exported PDF visual review | All 11 rendered pages checked; no clipping or overlap observed | October 10, 2026; PDF rendered-page inspection after print-layout correction |
-| Clean setup with README | Not recorded | |
+| Clean setup with README | Passed | October 10, 2026; fresh GitHub clone, `npm ci`, example environment copied, type checking, 25 unit tests, and production build; reported by the root agent |
 | Type checking from a fresh clone | Passed | October 10, 2026; `next typegen` then `tsc --noEmit`, reported by the root agent |
 | Browser consent and conversation walkthrough | Not recorded | |
 | Live Turkish randomization smoke check | HTTP 200; 6,385 ms; `canRelease: true` | October 10, 2026; one development request reported by the root agent |

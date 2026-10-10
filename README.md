@@ -9,12 +9,14 @@ Both modes keep the source visible, show an English back-translation for coordin
 
 [Public source repository](https://github.com/SonicGoodmorning/omni-bridge-hackru-2026)
 
+[Hosted sample preview](https://temporary-express-monsoon-5gkbxhw.vercel.app) — created October 10, 2026; Vercel reports that the initially temporary deployment has been claimed. The hosted preview has no Gemini key configured, so use **Sample mode** there.
+
 ## Run locally
 
 Use Node.js 22 or newer and npm. From the repository directory:
 
 ```sh
-npm install
+npm ci
 cp .env.example .env.local
 npm run dev
 ```
@@ -38,6 +40,8 @@ npm run test:e2e
 ```
 
 Alternatively, use an existing compatible Chrome installation with `PLAYWRIGHT_CHROME_PATH=/absolute/path/to/chrome npm run test:e2e`. The test configuration starts a development server on port 3000, or reuses an existing one outside CI. Unit tests run through Node's test runner with `tsx`; browser tests use Playwright.
+
+For persistent hosting, [import the GitHub repository into Vercel](https://vercel.com/docs/git/vercel-for-github) as a Next.js project. Keep it in Sample mode without credentials, or configure `GEMINI_API_KEY` and `GEMINI_MODEL` in the project's private environment-variable settings for a controlled live demonstration, then redeploy. Local `.env.local` values are not part of the public repository or the temporary preview.
 
 ## Sample walkthrough and live engine
 
@@ -72,7 +76,7 @@ See the [API contract](docs/api.md) for request and response fields and the [man
 
 ## Validation recorded so far
 
-The production build, type checking, 25 unit tests, and 10 browser tests passed during development. Type checking also passed from a fresh clone. All 11 presentation slides and the rendered PDF pages were visually checked. The browser speech cases use simulated recognition, so real microphone testing remains pending. A live Gemini run completed randomization explanations in Turkish, Spanish, Portuguese, and Hindi; quota errors prevented the remaining live cases, including Mandarin and conversation. See the [run record](docs/acceptance.md) and [synthetic live QA report](docs/live-qa.json) for exact coverage. No qualified language review or clinical validation is established by these checks.
+The production build, type checking, 25 unit tests, and 10 browser tests passed during development. A fresh GitHub clone also passed `npm ci`, type checking, all 25 unit tests, and the production build with the example environment copied into place. All 11 presentation slides and the rendered PDF pages were visually checked. The browser speech cases use simulated recognition, so real microphone testing remains pending. A live Gemini run completed randomization explanations in Turkish, Spanish, Portuguese, and Hindi; quota errors prevented the remaining live cases, including Mandarin and conversation. See the [run record](docs/acceptance.md) and [synthetic live QA report](docs/live-qa.json) for exact coverage. No qualified language review or clinical validation is established by these checks.
 
 ## Privacy and prototype limits
 
@@ -87,7 +91,7 @@ The production build, type checking, 25 unit tests, and 10 browser tests passed 
 
 Follow the [three-minute demo walkthrough](docs/demo.md). Open [the 11-slide presentation](docs/demo-slides.html) directly in a browser; use the arrow keys, Home/End, or the navigation controls. A [printable PDF](docs/demo-slides.pdf) is also included. All assets and styles are local to the HTML file.
 
-The submission capture workflow uses `public/demo-slides.html` for the web-served presentation at [localhost:3000/demo-slides.html](http://localhost:3000/demo-slides.html), `docs/screenshots/workspace.png` for the workspace image, and `docs/demo.webm` for the demonstration recording. These capture outputs are produced separately from the editable deck source; confirm they exist before sharing them.
+The deck is also served at [localhost:3000/demo-slides.html](http://localhost:3000/demo-slides.html). Captured materials include a [desktop workspace image](docs/screenshots/desktop-workspace.png), a [mobile viewport image](docs/screenshots/mobile.png), and a [silent, captioned sample walkthrough](docs/demo.webm) lasting 3 minutes and 0.68 seconds. The recording demonstrates fixed **Prepared sample** output and the review/release workflow; the separate live QA report documents the actual Gemini calls.
 
 Regeneron's [HackRU judging document](https://docs.google.com/document/d/15uxWxH70wIqqCJw9W6IX4BHoVz4rDBDuj6FSb5GublI/edit) asks for an open-source solution and strongly favors a GitHub repository. MIT is preferred, rather than mandatory. A demo video and brief deck are listed as presentation materials; approximately three minutes and 10–12 slides are suggestions, with longer submissions allowed. This repository uses the [MIT license](LICENSE). Repository publication and application hosting are separate from preparing these local materials.
 

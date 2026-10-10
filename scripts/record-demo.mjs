@@ -3,6 +3,7 @@
  * Start the production app first: npm run build && npm run start -- --port 3001
  * Run: PLAYWRIGHT_BROWSERS_PATH=/private/tmp/omni-playwright node scripts/record-demo.mjs
  * Optional: DEMO_URL and PLAYWRIGHT_CHROME_PATH override the local defaults.
+ * Add --screenshots-only to refresh the stills without recording another video.
  * This uses the actual prepared-sample UI; it never simulates live Gemini or speech.
  */
 import { mkdir, mkdtemp, rename, rm } from "node:fs/promises";
@@ -13,6 +14,7 @@ process.env.PLAYWRIGHT_BROWSERS_PATH ||= "/private/tmp/omni-playwright";
 const { chromium } = await import("@playwright/test");
 const baseURL = process.env.DEMO_URL || "http://127.0.0.1:3001";
 const chromePath = process.env.PLAYWRIGHT_CHROME_PATH || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+const screenshotsOnly = process.argv.includes("--screenshots-only");
 const output = path.resolve("docs");
 const screenshots = path.join(output, "screenshots");
 const temporaryVideo = await mkdtemp(path.join(tmpdir(), "omni-bridge-recording-"));
@@ -23,7 +25,7 @@ const context = await browser.newContext({
   viewport: { width: 1440, height: 960 },
   deviceScaleFactor: 1,
   reducedMotion: "reduce",
-  recordVideo: { dir: temporaryVideo, size: { width: 1440, height: 960 } },
+  ...(screenshotsOnly ? {} : { recordVideo: { dir: temporaryVideo, size: { width: 1440, height: 960 } } }),
 });
 const page = await context.newPage();
 page.setDefaultTimeout(15_000);
@@ -53,6 +55,17 @@ async function releaseDraft(target = page) {
 async function changeLocale(locale) {
   await page.getByLabel("Participant preferred language").selectOption(locale);
   await page.locator(".coordinator-column").evaluate((element) => { element.scrollTop = 0; });
+}
+
+async function verifyParticipantLayout(target, label, expectedHeight) {
+  const geometry = await target.locator(".participant-panel").evaluate((panel) => {
+    const actions = panel.querySelector(".participant-actions").getBoundingClientRect();
+    const footer = panel.querySelector(".participant-bottom").getBoundingClientRect();
+    return { actionsBottom: actions.bottom, footerTop: footer.top, panelHeight: panel.getBoundingClientRect().height, scrollHeight: panel.scrollHeight, clientHeight: panel.clientHeight };
+  });
+  if (geometry.actionsBottom > geometry.footerTop + 1) throw new Error(`${label}: copy controls overlap the participant footer.`);
+  if (expectedHeight && Math.abs(geometry.panelHeight - expectedHeight) > 1) throw new Error(`${label}: desktop workspace height changed unexpectedly.`);
+  console.log(`${label} layout verified: ${JSON.stringify(geometry)}`);
 }
 
 async function caption(title, body) {
@@ -98,6 +111,7 @@ async function scene(seconds, title, body, action) {
 }
 
 try {
+  if (!screenshotsOnly) {
   await selectSample();
   console.log(`Recording started: ${baseURL} · 180-second prepared sample walkthrough`);
 
@@ -161,22 +175,34 @@ try {
   const videoPath = await video.path();
   await rename(videoPath, path.join(output, "demo.webm"));
   console.log("Saved docs/demo.webm");
+  } else {
+    await context.close();
+  }
 
   const stills = await browser.newContext({ viewport: { width: 1440, height: 960 }, reducedMotion: "reduce", deviceScaleFactor: 1 });
   const still = await stills.newPage();
   await selectSample(still);
-  await still.screenshot({ path: path.join(screenshots, "desktop-workspace.png") });
+  await still.waitForTimeout(800);
+  await still.screenshot({ path: path.join(screenshots, "desktop-workspace.png"), animations: "disabled" });
   await still.getByRole("button", { name: "Create explanation", exact: true }).click();
   await still.getByText("Prepared sample", { exact: true }).waitFor();
   await releaseDraft(still);
   await still.locator(".coordinator-column").evaluate((element) => { element.scrollTop = 0; });
-  await still.screenshot({ path: path.join(screenshots, "desktop.png") });
+  await still.waitForTimeout(800);
+  await verifyParticipantLayout(still, "Desktop", 865);
+  await still.screenshot({ path: path.join(screenshots, "desktop.png"), animations: "disabled" });
   await still.setViewportSize({ width: 390, height: 844 });
-  await still.screenshot({ path: path.join(screenshots, "mobile.png"), fullPage: true });
+  await still.evaluate(() => window.scrollTo(0, 0));
+  await still.waitForTimeout(1000);
+  await still.screenshot({ path: path.join(screenshots, "mobile.png"), animations: "disabled" });
+  await still.locator(".participant-panel").evaluate((element) => element.scrollIntoView({ block: "start", behavior: "instant" }));
+  await still.waitForTimeout(1000);
+  await verifyParticipantLayout(still, "Mobile");
+  await still.screenshot({ path: path.join(screenshots, "mobile-participant.png"), animations: "disabled" });
   const overflow = await still.evaluate(() => document.documentElement.scrollWidth > innerWidth);
   if (overflow) throw new Error("Mobile screenshot has horizontal overflow.");
   await stills.close();
-  console.log("Saved desktop-workspace.png, desktop.png, mobile.png; mobile has no horizontal overflow.");
+  console.log("Saved desktop-workspace.png, desktop.png, mobile.png, mobile-participant.png; mobile has no horizontal overflow.");
 } finally {
   await browser.close();
   await rm(temporaryVideo, { recursive: true, force: true });
