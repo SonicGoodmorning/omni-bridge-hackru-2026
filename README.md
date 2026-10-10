@@ -1,15 +1,18 @@
 # Project Omni-Bridge
 
-A HackRU Fall 2026 prototype for explaining clinical research across languages. A research coordinator and a participant share one workspace with two equal modes:
+A HackRU Fall 2026 prototype for explaining clinical research across languages. A research coordinator and a participant share a workspace with three ways to communicate:
 
 - **Consent guide:** select a section of a fictional study document and prepare a simpler explanation in the participant's language.
 - **Conversation bridge:** speak or type an English explanation, correct the transcript, and send it for simplification and translation.
+- **Visits:** take turns speaking or typing, with English clinician messages translated into the participant's language and participant replies translated into English. Each turn is reviewed before it joins the bilingual conversation history.
 
-Both modes keep the source visible, show an English back-translation for coordinator review, and require a coordinator to release a draft to the participant view. Back-translation and automated flags are review aids. They do not establish medical accuracy or replace a qualified interpreter, approved study materials, or a human consent discussion.
+Consent and Conversation keep the source visible, show an English back-translation for coordinator review, and require a coordinator to release a draft to the participant view. Visits applies the same explicit review-and-share process in both directions, rendering the translation back into the original speaker's language. Back-translation and automated flags are review aids. They do not establish medical accuracy or replace a qualified interpreter, approved study materials, or a human consent discussion.
+
+See the [two-way visit guide](docs/visits.md) for the speaker workflow, prepared examples, and privacy limits. Visits translates the speakers' messages; it does not answer for them or generate clinical advice.
 
 [Public source repository](https://github.com/SonicGoodmorning/omni-bridge-hackru-2026)
 
-[Latest Vercel preview](https://express-monsoon-5gkbxhw-f3mutifxo-egegoodmorning-6248.vercel.app) — includes the final layout correction and requires Vercel authentication. The earlier [sample deployment](https://temporary-express-monsoon-5gkbxhw.vercel.app) was initially temporary and has been claimed. Both provide **Sample mode**; a private server environment variable enables live Gemini separately.
+[Latest Vercel preview](https://express-monsoon-5gkbxhw-3ul28m5xm-egegoodmorning-6248.vercel.app) · [Open Visits](https://express-monsoon-5gkbxhw-3ul28m5xm-egegoodmorning-6248.vercel.app/visits) — includes two-way Visits and requires Vercel authentication. The Gemini key is configured as an encrypted, sensitive server-side Preview environment variable. Sample mode remains available without model calls. Older immutable previews do not include Visits.
 
 ## Run locally
 
@@ -47,8 +50,8 @@ For persistent hosting, [import the GitHub repository into Vercel](https://verce
 
 | Engine | What it does | What it does not establish |
 | --- | --- | --- |
-| Sample | Returns fixed, labelled examples for six consent sections in all five languages and one fixed conversation | A live model call, arbitrary conversation support, translation accuracy, or clinical validation |
-| Live Gemini | Sends a section or reviewed English transcript through the server to Gemini, then makes a separate stateless back-translation request | Independent clinical verification or guaranteed faithful translation |
+| Sample | Returns fixed, labelled examples for six consent sections, one English Conversation script, and an eight-turn bilingual Visits exchange in all five languages | A live model call, arbitrary conversation support, translation accuracy, or clinical validation |
+| Live Gemini | Sends a consent section or one reviewed speaker turn through the server to Gemini, then makes a separate stateless back-translation request | Independent clinical verification or guaranteed faithful translation |
 
 Sample mode never silently replaces a failed live request. Its fixed conversation is:
 
@@ -66,9 +69,9 @@ Facts to preserve include a 50% chance of either group, possible placebo assignm
 
 ## Architecture
 
-The app uses Next.js App Router, TypeScript, React with reducer-managed session state, and Tailwind CSS. A Next.js server route calls Gemini through `@google/genai`; Zod validates structured output. The API key stays on the server. Source material is treated as content to explain, never as instructions that can override the model's task.
+The app uses Next.js App Router, TypeScript, React with reducer-managed session state, and Tailwind CSS. Next.js server routes call Gemini through `@google/genai`; Zod validates structured output. `/api/bridge` handles study explanations; `/api/visits` handles one faithful bilingual speaker turn. The API key stays on the server. Source material is treated as content to explain or translate, never as instructions that can override the model's task.
 
-For live requests, the server first prepares the patient-language explanation, then asks Gemini in a separate stateless call to translate that result back to English. The back-translation call does not receive the original English source. This reduces shared context, but both calls can still share model weaknesses. Review flags and release eligibility support the coordinator's inspection; passing checks is not proof that a result is correct.
+For live study explanations, the server first prepares the patient-language explanation, then asks Gemini in a separate stateless call to translate that result back to English. Visits uses the same two-call separation in either direction, rendering its translated turn back into the original speaker's language. The second call receives only the generated translation and language direction, without the source message or conversation history. This reduces shared context, but both calls can still share model weaknesses. Review flags and release eligibility support inspection; passing checks is not proof that a result is correct.
 
 The live pipeline has a 45-second overall budget within a 60-second route duration. The source, mode, locale, request identity, and study version bind a draft to its context. A changed source or language must invalidate an earlier draft and its release state. The participant view receives only a result explicitly released by the coordinator.
 
@@ -76,7 +79,9 @@ See the [API contract](docs/api.md) for request and response fields and the [man
 
 ## Validation recorded so far
 
-The production build, type checking, 25 unit tests, and 10 browser tests passed during development. A fresh GitHub clone also passed `npm ci`, type checking, all 25 unit tests, and the production build with the example environment copied into place. All 11 presentation slides and the rendered PDF pages were visually checked. The browser speech cases use simulated recognition, so real microphone testing remains pending. A live Gemini run completed randomization explanations in Turkish, Spanish, Portuguese, and Hindi; quota errors prevented the remaining live cases, including Mandarin and conversation. See the [run record](docs/acceptance.md) and [synthetic live QA report](docs/live-qa.json) for exact coverage. No qualified language review or clinical validation is established by these checks.
+The production build, type checking, 40 unit cases, and 26 browser cases passed during development. Browser coverage includes 16 Visits cases and 10 original-workspace cases; its final record is a 25-case complete run plus the subsequent long-speech regression. Before the Visits extension, a fresh GitHub clone also passed `npm ci`, type checking, all 25 then-existing unit tests, and the production build with the example environment copied into place. All 11 presentation slides and the rendered PDF pages were visually checked.
+
+The browser speech and playback cases use simulated services, so real microphone and voice testing remain pending. Live Visits smoke checks completed clinician English → Turkish and participant Turkish → English while retaining the participant question as a question. See the [Visits validation record](docs/visits.md#observed-validation) and [synthetic visit report](docs/visits-live-qa.json). An earlier live Gemini run completed consent randomization explanations in Turkish, Spanish, Portuguese, and Hindi; quota errors prevented its remaining cases. See the original [run record](docs/acceptance.md) and [synthetic live QA report](docs/live-qa.json) for exact coverage. No qualified language review or clinical validation is established by these checks.
 
 ## Privacy and prototype limits
 
@@ -91,7 +96,7 @@ The production build, type checking, 25 unit tests, and 10 browser tests passed 
 
 Follow the [three-minute demo walkthrough](docs/demo.md). Open [the 11-slide presentation](docs/demo-slides.html) directly in a browser; use the arrow keys, Home/End, or the navigation controls. A [printable PDF](docs/demo-slides.pdf) is also included. All assets and styles are local to the HTML file.
 
-The deck is also served at [localhost:3000/demo-slides.html](http://localhost:3000/demo-slides.html). Captured materials include a [desktop workspace image](docs/screenshots/desktop-workspace.png), a [mobile viewport image](docs/screenshots/mobile.png), and a [silent, captioned sample walkthrough](docs/demo.webm) lasting 3 minutes and 0.68 seconds. The recording demonstrates fixed **Prepared sample** output and the review/release workflow; the separate live QA report documents the actual Gemini calls.
+The deck is also served at [localhost:3000/demo-slides.html](http://localhost:3000/demo-slides.html). Captured materials include a [desktop workspace image](docs/screenshots/desktop-workspace.png), a [mobile viewport image](docs/screenshots/mobile.png), and a [silent, captioned sample walkthrough](docs/demo.webm) lasting 3 minutes and 0.68 seconds. The recording predates Visits and demonstrates fixed **Prepared sample** output and the original review/release workflow. New Visits captures show [both speakers](docs/screenshots/visits-desktop.png), [participant-to-clinician review](docs/screenshots/visits-patient-review.png), the [shared bilingual history](docs/screenshots/visits-conversation.png), and [participant controls on mobile](docs/screenshots/visits-patient-mobile.png). Separate live QA reports document actual Gemini calls.
 
 Regeneron's [HackRU judging document](https://docs.google.com/document/d/15uxWxH70wIqqCJw9W6IX4BHoVz4rDBDuj6FSb5GublI/edit) asks for an open-source solution and strongly favors a GitHub repository. MIT is preferred, rather than mandatory. A demo video and brief deck are listed as presentation materials; approximately three minutes and 10–12 slides are suggestions, with longer submissions allowed. This repository uses the [MIT license](LICENSE). Repository publication and application hosting are separate from preparing these local materials.
 

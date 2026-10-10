@@ -75,14 +75,14 @@ export function Workspace({ liveAvailable }: { liveAvailable: boolean }) {
   return <div className="workspace-shell" inert={!ready}>
     <aside className="app-rail" aria-label="Omni-Bridge navigation">
       <a className="brand-mark" href="#main-workspace" aria-label="Omni-Bridge workspace"><Icon name="bridge" size={29} /></a>
-      <div className="rail-tools"><a href="#main-workspace" className="rail-button active" aria-label="Clinical research workspace" title="Clinical research workspace"><Icon name="document" size={22} /></a></div>
+      <div className="rail-tools"><a href="#main-workspace" className="rail-button active" aria-label="Clinical research workspace" title="Clinical research workspace"><Icon name="document" size={22} /></a><a href="/visits" className="rail-button" aria-label="Visits workspace" title="Visits"><Icon name="chat" size={22} /></a></div>
       <button className={`rail-button help-button ${helpOpen ? "active" : ""}`} aria-label="About this prototype" aria-expanded={helpOpen} aria-controls="prototype-help" onClick={() => setHelpOpen(!helpOpen)}><Icon name="help" size={22} /></button>
     </aside>
 
     <div className="app-main">
       <header className="session-header">
         <div className="brand-wordmark">omni<span>bridge</span><div className="brand-caption">CLINICAL RESEARCH COMPANION</div></div>
-        <div className="session-actions"><span className="prototype-label"><span />HackRU prototype</span><button className="text-button reset-button" onClick={reset}><Icon name="reset" size={16} /><span>New session</span></button></div>
+        <div className="session-actions"><a href="/visits" className="text-button"><Icon name="chat" size={16} />Visits</a><span className="prototype-label"><span />HackRU prototype</span><button className="text-button reset-button" onClick={reset}><Icon name="reset" size={16} /><span>New session</span></button></div>
       </header>
 
       {helpOpen && <section className="help-panel" id="prototype-help" aria-label="About this prototype"><div><strong>A tool for the conversation.</strong><p>This prototype explains fictional study material. AI explanations can contain errors. It does not provide medical advice, replace an interpreter, or collect informed consent. Sample mode uses prepared examples; Gemini mode makes a live request.</p></div><button className="icon-button" aria-label="Close prototype information" onClick={() => setHelpOpen(false)}><Icon name="close" /></button></section>}

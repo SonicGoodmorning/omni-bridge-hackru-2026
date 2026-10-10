@@ -38,16 +38,18 @@ export function useSpeech({ onTranscript }: { onTranscript: (text: string) => vo
     const browser = window as typeof window & { SpeechRecognition?: RecognitionConstructor; webkitSpeechRecognition?: RecognitionConstructor };
     setSupported(Boolean(browser.SpeechRecognition || browser.webkitSpeechRecognition));
     return () => {
-      if (recognition.current) {
-        recognition.current.onend = null;
-        recognition.current.onerror = null;
-        recognition.current.onresult = null;
-        recognition.current.abort();
+      const instance = recognition.current;
+      recognition.current = null;
+      if (instance) {
+        instance.onend = null;
+        instance.onerror = null;
+        instance.onresult = null;
+        instance.abort();
       }
     };
   }, []);
 
-  const start = useCallback(() => {
+  const start = useCallback((language = "en-US") => {
     if (recognition.current) return;
     const browser = window as typeof window & { SpeechRecognition?: RecognitionConstructor; webkitSpeechRecognition?: RecognitionConstructor };
     const Recognition = browser.SpeechRecognition || browser.webkitSpeechRecognition;
@@ -56,7 +58,7 @@ export function useSpeech({ onTranscript }: { onTranscript: (text: string) => vo
     setInterim("");
     const instance = new Recognition();
     recognition.current = instance;
-    instance.lang = "en-US";
+    instance.lang = language;
     instance.continuous = false;
     instance.interimResults = true;
     instance.onresult = (event) => {

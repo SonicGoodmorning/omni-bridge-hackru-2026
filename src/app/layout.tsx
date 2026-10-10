@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Omni-Bridge · Understand the trial",
-  description: "A synthetic clinical-trial education prototype. Explain, review, and share in five languages.",
+  title: "Omni-Bridge · Understand the conversation",
+  description: "Synthetic trial education and bilingual visit practice. Translate, review, and share in five languages.",
   robots: { index: false, follow: false },
 };
 

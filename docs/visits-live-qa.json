@@ -1,0 +1,56 @@
+{
+  "checkedAt": "2026-10-10T18:35:25.336Z",
+  "synthetic": true,
+  "results": [
+    {
+      "speaker": "clinician",
+      "status": 200,
+      "wallMs": 7662,
+      "result": {
+        "requestId": "80e197de-e6c0-4e1f-8c72-6d395c4e1598",
+        "locale": "tr-TR",
+        "engine": "live",
+        "speaker": "clinician",
+        "sourceText": "What questions would you like to ask about this fictional study?",
+        "sourceLanguage": "en-US",
+        "targetLanguage": "tr-TR",
+        "translation": "Bu kurgusal çalışma hakkında hangi soruları sormak istersiniz?",
+        "reverseTranslation": "What questions would you like to ask about this fictional work?",
+        "flags": [
+          {
+            "code": "REVIEW_AID",
+            "severity": "info",
+            "message": "Reverse translation and quantity checks are review aids, not proof of accuracy. Review names, units, negations, questions, and meaning before sharing; native-language checks are limited to written digits."
+          }
+        ],
+        "elapsedMs": 7430,
+        "canRelease": true
+      }
+    },
+    {
+      "speaker": "participant",
+      "status": 200,
+      "wallMs": 8004,
+      "result": {
+        "requestId": "be6dbc06-71ea-4e6a-a638-148bb27a2693",
+        "locale": "tr-TR",
+        "engine": "live",
+        "speaker": "participant",
+        "sourceText": "Bu çalışmaya katılmak zorunda mıyım?",
+        "sourceLanguage": "tr-TR",
+        "targetLanguage": "en-US",
+        "translation": "Do I have to participate in this study?",
+        "reverseTranslation": "Bu çalışmaya katılmak zorunda mıyım?",
+        "flags": [
+          {
+            "code": "REVIEW_AID",
+            "severity": "info",
+            "message": "Reverse translation and quantity checks are review aids, not proof of accuracy. Review names, units, negations, questions, and meaning before sharing; native-language checks are limited to written digits."
+          }
+        ],
+        "elapsedMs": 7992,
+        "canRelease": true
+      }
+    }
+  ]
+}
