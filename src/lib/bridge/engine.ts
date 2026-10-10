@@ -90,7 +90,7 @@ export async function executeBridge(input: unknown, options: BridgeOptions = {})
   const onExternalAbort = () => controller.abort(options.signal?.reason);
   options.signal?.addEventListener("abort", onExternalAbort, { once: true });
   const timer = setTimeout(() => controller.abort(new BridgeServiceError("REQUEST_TIMEOUT", "The live engine took too long. Nothing new was released. Please retry.", 504, true)), options.deadlineMs ?? 45_000);
-  const model = options.model ?? "gemini-3.8-flash";
+  const model = options.model ?? "gemini-3.5-flash-lite";
   const sourceText = request.mode === "consent" ? SECTIONS.find((section) => section.id === request.sectionId)!.body : request.text!;
   const call = (system_instruction: string, modelInput: string, schema: Record<string, unknown>) => cancellable(
     () => options.transport!.generate({ model, system_instruction, input: modelInput, response_format: { type: "text", mime_type: "application/json", schema }, generation_config: { thinking_level: "low" }, store: false }, controller.signal),

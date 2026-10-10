@@ -12,7 +12,7 @@ See the [two-way visit guide](docs/visits.md) for the speaker workflow, prepared
 
 [Public source repository](https://github.com/SonicGoodmorning/omni-bridge-hackru-2026)
 
-[Latest Vercel preview](https://express-monsoon-5gkbxhw-3ul28m5xm-egegoodmorning-6248.vercel.app) · [Open Visits](https://express-monsoon-5gkbxhw-3ul28m5xm-egegoodmorning-6248.vercel.app/visits) — includes two-way Visits and requires Vercel authentication. The Gemini key is configured as an encrypted, sensitive server-side Preview environment variable. Sample mode remains available without model calls. Older immutable previews do not include Visits.
+[Latest Vercel preview](https://express-monsoon-5gkbxhw-a1izjn8fe-egegoodmorning-6248.vercel.app) · [Open Visits](https://express-monsoon-5gkbxhw-a1izjn8fe-egegoodmorning-6248.vercel.app/visits) — includes two-way Visits and requires Vercel authentication. The Gemini key is configured as an encrypted, sensitive server-side Preview environment variable. Sample mode remains available without model calls. Older immutable previews do not include Visits.
 
 ## Run locally
 
@@ -24,7 +24,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [localhost:3000](http://localhost:3000). The sample walkthrough works without an API key. To make live Gemini requests, set `GEMINI_API_KEY` in `.env.local` and restart the development server. `GEMINI_MODEL` selects the server-side model; the default is `gemini-3.8-flash`. Choose a model available to your Google account if that model is unavailable. Never prefix the key with `NEXT_PUBLIC_`.
+Open [localhost:3000](http://localhost:3000). The sample walkthrough works without an API key. To make live Gemini requests, set `GEMINI_API_KEY` in `.env.local` and restart the development server. `GEMINI_MODEL` selects the server-side model; the default is `gemini-3.5-flash-lite`. Choose a model available to your Google account if that model is unavailable. Never prefix the key with `NEXT_PUBLIC_`.
 
 ```sh
 npm run typecheck

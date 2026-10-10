@@ -57,3 +57,9 @@ Visit browser checks cover both translation directions and the review gate, labe
 Local live Gemini smoke checks completed in both Turkish directions on October 10, 2026: clinician English → Turkish in 7,662 ms wall time and participant Turkish → English in 8,004 ms. The participant question “Bu çalışmaya katılmak zorunda mıyım?” remained a question: “Do I have to participate in this study?” The separate Turkish reverse rendering also remained a question. See the [synthetic live report](visits-live-qa.json) for the exact requests and outputs.
 
 Those two successful calls do not establish live coverage in all five languages or qualified translation accuracy. Real microphone recognition, real browser-voice playback, fluent human review in each language, and clinical deployment assessment remain separate from automated browser and schema checks. The original [acceptance record](acceptance.md) records the earlier consent/conversation implementation.
+
+### Flash-Lite configuration update
+
+Later on October 10, the Gemini API reported that this project's `gemini-3.8-flash` free-tier allowance of 20 requests per day was exhausted. A two-call live test using `gemini-3.5-flash-lite` succeeded in 1,594 ms: “Bu kurgusal çalışmaya katılmak zorunda mıyım?” became “Do I have to participate in this fictional study?” and reversed to the original Turkish. The server default and configured Preview model now use Flash-Lite. This is one observed latency result, not a benchmark or language validation. All 40 unit tests passed after the configuration change.
+
+The API response did not expose Flash-Lite's daily allowance. Check the project's active model quotas in [AI Studio](https://ai.dev/rate-limit); model limits vary by project and tier. Each complete live turn still consumes two model calls, and the app does not automatically rotate models after quota errors.

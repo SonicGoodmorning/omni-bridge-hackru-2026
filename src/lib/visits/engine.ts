@@ -64,7 +64,7 @@ export async function executeVisit(input: unknown, options: VisitOptions = {}): 
   const onExternalAbort = () => controller.abort(options.signal?.reason);
   options.signal?.addEventListener("abort", onExternalAbort, { once: true });
   const timer = setTimeout(() => controller.abort(new BridgeServiceError("REQUEST_TIMEOUT", "The live translation took too long. Nothing new was shared. Please retry.", 504, true)), options.deadlineMs ?? 45_000);
-  const model = options.model ?? "gemini-3.8-flash";
+  const model = options.model ?? "gemini-3.5-flash-lite";
   const call = (system_instruction: string, text: string, schema: Record<string, unknown>) => {
     const modelRequest: ModelRequest = { model, system_instruction, input: text, response_format: { type: "text", mime_type: "application/json", schema }, generation_config: { thinking_level: "low" }, store: false };
     return cancellable(() => options.transport!.generate(modelRequest, controller.signal), controller.signal);

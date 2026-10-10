@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const apiKey = process.env.GEMINI_API_KEY?.trim();
     const result = await executeBridge(input, {
       transport: apiKey ? createGeminiTransport(apiKey) : undefined,
-      model: process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash",
+      model: process.env.GEMINI_MODEL?.trim() || "gemini-3.5-flash-lite",
       signal: request.signal,
     });
     return Response.json(result, { headers });
