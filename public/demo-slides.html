@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Omni-Bridge · HackRU Fall 2026</title>
+  <style>
+    :root { --paper: #f6f4ed; --ink: #17342f; --muted: #596b64; --accent: #157768; --line: #bccbc2; --soft: #dfebe1; }
+    * { box-sizing: border-box; }
+    html { background: #e6e9e2; color: var(--ink); }
+    body { margin: 0; font-family: Inter, "Aptos", "Segoe UI", Arial, sans-serif; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, a:focus-visible { outline: 3px solid #bf7049; outline-offset: 5px; }
+    .deck { display: flex; min-height: 100svh; align-items: center; justify-content: center; padding: 32px 24px 82px; }
+    .slide { display: none; position: relative; overflow: hidden; width: min(1280px, 100%); aspect-ratio: 16/9; background: var(--paper); padding: 64px 76px; box-shadow: 0 20px 70px #17342f12; }
+    .slide.is-active { display: flex; flex-direction: column; }
+    .slide.dark { background: var(--ink); color: var(--paper); --muted: #b4c9be; --line: #49625b; --accent: #b9e3c6; --soft: #294a41; }
+    .eyebrow { color: var(--accent); margin: 0 0 20px; font-size: 15px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-family: Georgia, "Times New Roman", serif; font-size: clamp(44px, 7vw, 92px); line-height: 1.02; font-weight: 400; letter-spacing: -.045em; }
+    h2 { max-width: 1080px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(32px, 4.4vw, 58px); line-height: 1.08; font-weight: 400; letter-spacing: -.035em; }
+    h3 { font-size: 24px; font-weight: 600; line-height: 1.25; }
+    .lede { max-width: 810px; margin-top: 28px; font-size: 28px; line-height: 1.4; }
+    .body { font-size: 23px; line-height: 1.5; }
+    .quiet { color: var(--muted); font-size: 18px; line-height: 1.5; }
+    .small { font-size: 16px; line-height: 1.5; }
+    .accent { color: var(--accent); }
+    .spacer { flex: 1; }
+    .footer { margin-top: auto; padding-top: 22px; border-top: 1px solid var(--line); display: flex; gap: 20px; justify-content: space-between; color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .footer a, .source a { color: inherit; text-underline-offset: 3px; }
+    .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; margin-top: 42px; }
+    .columns > div + div { border-left: 1px solid var(--line); padding-left: 56px; }
+    .columns p { margin-top: 16px; }
+    .number { font-family: Georgia, "Times New Roman", serif; font-size: 82px; line-height: 1; color: var(--accent); margin-bottom: 18px; }
+    .quote { font-family: Georgia, "Times New Roman", serif; font-size: clamp(35px, 4.8vw, 62px); line-height: 1.18; max-width: 950px; margin-top: 42px; }
+    .quote em { font-style: normal; color: var(--accent); }
+    .sequence { list-style: none; padding: 0; margin: 35px 0 20px; counter-reset: step; }
+    .sequence li { counter-increment: step; display: flex; gap: 22px; align-items: baseline; padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 24px; line-height: 1.4; }
+    .sequence li::before { content: "0" counter(step); font-size: 15px; font-weight: 700; color: var(--accent); min-width: 28px; }
+    .languages { display: grid; grid-template-columns: 1.1fr 1fr; gap: 2px 60px; margin-top: 36px; }
+    .language { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .language strong { font-family: Georgia, "Noto Serif", "Noto Sans Devanagari", "PingFang SC", serif; font-size: 32px; font-weight: 400; }
+    .language span { color: var(--muted); font-size: 17px; }
+    .facts { margin-top: 35px; width: 100%; border-collapse: collapse; font-size: 23px; line-height: 1.4; }
+    .facts th, .facts td { padding: 14px 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .facts th { width: 30%; font-weight: 600; color: var(--accent); padding-right: 30px; }
+    .source { font-size: 13px; line-height: 1.45; color: var(--muted); margin-top: 20px; }
+    .notes { display: none; }
+    .toolbar { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 18px; background: #f6f4edf2; border: 1px solid #c7d2c9; padding: 8px 14px; border-radius: 9px; box-shadow: 0 6px 24px #17342f0d; }
+    .toolbar button { border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 14px; cursor: pointer; min-height: 34px; padding: 5px 8px; }
+    .toolbar button:disabled { opacity: .35; cursor: default; }
+    .counter { font-size: 13px; color: var(--muted); min-width: 42px; text-align: center; font-variant-numeric: tabular-nums; }
+    .keyboard { text-align: center; position: fixed; bottom: 0; left: 0; right: 0; font-size: 11px; color: var(--muted); padding: 3px; }
+    .notes-panel { max-width: 1280px; margin: -55px auto 90px; padding: 24px; background: #fff; border-top: 2px solid var(--accent); font-size: 17px; line-height: 1.6; }
+    .notes-panel[hidden] { display: none; }
+    @media (max-width: 800px) {
+      .deck { padding: 12px 12px 84px; align-items: flex-start; }
+      .slide { aspect-ratio: auto; min-height: calc(100svh - 112px); padding: 34px 28px; }
+      h1 { font-size: 58px; }
+      h2 { font-size: 39px; }
+      .lede { font-size: 24px; }
+      .body, .sequence li, .facts { font-size: 20px; }
+      .columns { gap: 22px; margin-top: 28px; }
+      .columns > div + div { padding-left: 22px; }
+      .languages { grid-template-columns: 1fr; gap: 0; margin-top: 25px; }
+      .language { padding: 8px 0; }
+      .language strong { font-size: 28px; }
+      .quote { font-size: 39px; margin-top: 30px; }
+      .quiet { font-size: 16px; }
+      .footer { margin-top: 30px; }
+      .notes-panel { margin: 0 12px 85px; }
+    }
+    @media print {
+      @page { size: 13.333in 7.5in; margin: 0; }
+      html, body { background: var(--paper); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .deck { display: block; padding: 0; min-height: 0; }
+      .slide, .slide.is-active { display: flex !important; flex-direction: column !important; width: 13.333in; height: 7.5in; aspect-ratio: auto; padding: 50px 65px; box-shadow: none; break-after: page; page-break-after: always; }
+      .slide:last-child { break-after: auto; page-break-after: auto; }
+      h1 { font-size: 82px; }
+      h2 { font-size: 52px; }
+      .toolbar, .keyboard, .notes-panel { display: none !important; }
+      .footer { margin-top: auto; }
+      a { text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck" aria-label="Omni-Bridge presentation">
+    <section class="slide dark is-active" aria-label="Slide 1 of 11: Omni-Bridge">
+      <p class="eyebrow">HackRU · Fall 2026</p>
+      <div class="spacer"></div>
+      <h1>Omni-Bridge</h1>
+      <p class="lede">Clinical research explained<br>in the participant's language</p>
+      <div class="spacer"></div>
+      <div class="footer"><span>Consent guide + conversation bridge</span><span>Fictional study · Research prototype</span></div>
+      <aside class="notes">Introduce the project as a research prototype. Both modes share a human review step. Name the engine you will demonstrate: fixed samples or live Gemini. Do not suggest the fictional study is approved for actual enrollment.</aside>
+    </section>
+
+    <section class="slide" aria-label="Slide 2 of 11: The participant's question">
+      <p class="eyebrow">The participant's question</p>
+      <h2>Understanding the choice</h2>
+      <p class="quote">“So I will <em>definitely</em><br>get the new medicine?”</p>
+      <p class="body" style="margin-top:32px;max-width:830px">A fluent explanation can still lose uncertainty, placebo assignment, or the right to leave.</p>
+      <div class="footer"><span>Illustrative scenario, not a patient quotation</span><span>02</span></div>
+      <aside class="notes">This line is a fictional persona based on the sponsor's Teach It Back starter sheet. Do not call it a real patient quote or imply measured prevalence. Sponsor context: https://drive.google.com/file/d/1_UkzCt6a3uxCefqlm7j7ai7GCYB4Fz5x/view</aside>
+    </section>
+
+    <section class="slide" aria-label="Slide 3 of 11: Two equal workflows">
+      <p class="eyebrow">One shared workspace</p>
+      <h2>Two equal workflows</h2>
+      <div class="columns">
+        <div><p class="number">01</p><h3>Consent guide</h3><p class="body">Choose a document section.<br>Explain its meaning in simpler language.</p></div>
+        <div><p class="number">02</p><h3>Conversation bridge</h3><p class="body">Speak or type an explanation.<br>Correct the transcript before sending.</p></div>
+      </div>
+      <p class="quiet" style="margin-top:36px">Both prepare a draft for coordinator review and explicit release.</p>
+      <div class="footer"><span>Original source remains visible</span><span>03</span></div>
+      <aside class="notes">Give each workflow equal time in the demonstration. A document section comes from the local synthetic fixture. Conversation input is reviewed English text, either typed or transcribed. Microphone access is optional.</aside>
+    </section>
+
+    <section class="slide" aria-label="Slide 4 of 11: The CLEAR Study">
+      <p class="eyebrow">Synthetic source material</p>
+      <h2>The CLEAR Study</h2>
+      <div class="columns">
+        <div><h3>CLEAR-026 · DEMO-1.0</h3><p class="body">Investigational tablet compared with placebo.<br><br>No guaranteed health benefit.</p><p class="quiet">October 10, 2026</p></div>
+        <div><p class="body">Study purpose<br>Group assignment<br>Visits and procedures<br>Risks and uncertainties<br>Voluntary participation<br>Leaving the study</p></div>
+      </div>
+      <div class="footer"><span>Six fictional sections · No actual clinical trial</span><span>04</span></div>
+      <aside class="notes">The document is authored as a synthetic fixture in src/lib/study.ts. It is not an IRB-approved form. Point to version DEMO-1.0 and the explicit no-guaranteed-benefit statement. Do not discuss eligibility or a real treatment.</aside>
+    </section>
+
+    <section class="slide" aria-label="Slide 5 of 11: Consent guide">
+      <p class="eyebrow">Consent guide</p>
+      <h2>One section at a time</h2>
+      <ol class="sequence">
+        <li>Select the source section and participant language</li>
+        <li>Prepare a simpler explanation with its source attached</li>
+        <li>Inspect the target text, back-translation, and flags</li>
+        <li>Release the current draft after coordinator review</li>
+      </ol>
+      <div class="footer"><span>The tool explains the document; a human conducts consent</span><span>05</span></div>
+      <aside class="notes">Demonstrate randomization. Confirm 50% chance, neither person choosing the group, possible placebo, and no guaranteed benefit. Before release, point out that the patient side has not received the draft. The interface does not collect signatures or grant enrollment.</aside>
+    </section>
+
+    <section class="slide dark" aria-label="Slide 6 of 11: Conversation bridge">
+      <p class="eyebrow">Conversation bridge</p>
+      <h2>Speech with a review step</h2>
+      <p class="quote" style="font-size:48px">Speak. Review the transcript.<br>Send. Review the explanation.<br><em>Then release.</em></p>
+      <p class="quiet" style="margin-top:32px;max-width:870px">Typed input remains available. Browser recognition may use a remote speech service; synthetic demonstrations only.</p>
+      <div class="footer"><span>Source edits and language changes invalidate earlier drafts</span><span>06</span></div>
+      <aside class="notes">Show push-to-talk transcription or paste the fixed conversation. Correct recognition before sending. Native speech recognition is browser-dependent and may process audio remotely. Without a key, only the documented fixed sample conversation is supported. Do not silently substitute it for arbitrary speech.</aside>
+    </section>
+
+    <section class="slide" aria-label="Slide 7 of 11: Language choices">
+      <p class="eyebrow">Five target locales</p>
+      <h2>Language choices</h2>
+      <div class="languages">
+        <div class="language"><strong lang="tr">Türkçe</strong><span>Turkish</span></div>
+        <div class="language"><strong lang="es">Español</strong><span>Latin America</span></div>
+        <div class="language"><strong lang="pt-BR">Português</strong><span>Brazil</span></div>
+        <div class="language"><strong lang="hi">हिन्दी</strong><span>Hindi</span></div>
+        <div class="language"><strong lang="zh-CN">简体中文</strong><span>Mandarin</span></div>
+      </div>
+      <p class="quiet" style="margin-top:26px">All five need qualified human review. Turkish team review is pending.</p>
+      <div class="footer"><span>Prototype coverage does not establish translation quality</span><span>07</span></div>
+      <aside class="notes">Locales are tr-TR, es-419, pt-BR, hi-IN, and zh-CN. The project has not established certified or clinically validated coverage. Show one language change and the cleared draft. Do not claim completed team review.</aside>
+    </section>
+
+    <section class="slide" aria-label="Slide 8 of 11: Gemini and coordinator review">
+      <p class="eyebrow">Live engine</p>
+      <h2>Gemini prepares.<br>The coordinator reviews.</h2>
+      <div class="columns" style="margin-top:34px">
+        <div><h3>Two stateless requests</h3><p class="body">Source → target explanation<br><br>Target explanation → English<br><span class="quiet">The second request does not see the original source.</span></p></div>
+        <div><h3>Visible review evidence</h3><p class="body">Source and study version<br>Structured output checks<br>Flags and back-translation<br>Explicit release action</p></div>
+      </div>
+      <div class="footer"><span>The same model can make correlated errors. This is a review aid.</span><span>08</span></div>
+      <aside class="notes">The Next.js server calls Gemini through @google/genai and validates structured output with Zod. The key stays server-side. The live pipeline has a 45-second overall budget. Separate stateless back-translation is not an independent professional translator or proof of medical accuracy.</aside>
+    </section>
+
+    <section class="slide" aria-label="Slide 9 of 11: Critical facts">
+      <p class="eyebrow">Review examples from the fictional study</p>
+      <h2>Critical facts in view</h2>
+      <table class="facts">
+        <tbody>
+          <tr><th>50%</th><td>Chance of either group; neither person chooses</td></tr>
+          <tr><th>4 visits · 8 weeks</th><td>Approximately 60 minutes per visit</td></tr>
+          <tr><th>5 mL</th><td>Blood sample at the first and final visits</td></tr>
+          <tr><th>Your choice</th><td>May leave at any time without penalty</td></tr>
+        </tbody>
+      </table>
+      <div class="footer"><span>Test altered numbers, units, negations, and unsupported promises</span><span>09</span></div>
+      <aside class="notes">These facts come from src/lib/study.ts. Automated flags can miss semantic errors, so compare the target language directly with a qualified reviewer. Acceptance cases are documented in docs/acceptance.md. Do not invent a detection percentage or say all planted errors are detected unless the recorded test evidence supports it.</aside>
+    </section>
+
+    <section class="slide" aria-label="Slide 10 of 11: Prototype boundaries">
+      <p class="eyebrow">Demonstration boundaries</p>
+      <h2>What the prototype establishes</h2>
+      <div class="columns">
+        <div><h3>Inspect the workflow</h3><p class="body">Both modes use the same review gate. Fixed samples keep a demo reproducible and visibly separate from live Gemini.</p></div>
+        <div><h3>Further review is needed</h3><p class="body">No clinical validation or measured patient outcomes. No real patient records, signatures, or durable clinical approval.</p></div>
+      </div>
+      <p class="quiet" style="margin-top:35px">The original document and human consent discussion remain authoritative.</p>
+      <div class="footer"><span>Open-source prototype · MIT license</span><span>10</span></div>
+      <aside class="notes">The application is a hackathon prototype. Local repository files do not establish a published repository or deployment. Do not claim tests passed unless their actual results are recorded. A demo video must be recorded separately.</aside>
+    </section>
+
+    <section class="slide dark" aria-label="Slide 11 of 11: Next step">
+      <p class="eyebrow">Next step</p>
+      <h2>Review with the people<br>who will use it</h2>
+      <p class="lede">Qualified language reviewers.<br>Research coordinators.<br>Participants in a usability study.</p>
+      <p class="quiet" style="margin-top:30px;max-width:900px">Document missed errors and confusing concepts before expanding into teach-back checks or real study workflows.</p>
+      <div class="spacer"></div>
+      <div class="footer"><span>Omni-Bridge · HackRU Fall 2026</span><span>11</span></div>
+      <aside class="notes">Close with the development direction, not an invented outcome. Teach-back evaluation and clinical integrations are future work, not implemented features. Sponsor inspiration: Teach It Back and Lost In Translation in the public HackRU Regeneron Starter Kit at https://drive.google.com/drive/folders/1-ap-Ujtxsfm-YwtkCbwYYcTi6hTu5F_o . Regeneron's presentation guidance suggests roughly three minutes of video and 10–12 slides; these are not hard limits.</aside>
+    </section>
+  </main>
+
+  <div id="notes-panel" class="notes-panel" hidden aria-label="Speaker notes"></div>
+  <nav class="toolbar" aria-label="Presentation navigation">
+    <button id="previous" type="button" aria-label="Previous slide">← Previous</button>
+    <output id="counter" class="counter" aria-live="polite">1 / 11</output>
+    <button id="next" type="button" aria-label="Next slide">Next →</button>
+    <button id="notes-toggle" type="button" aria-expanded="false" aria-controls="notes-panel">Notes</button>
+    <button id="print" type="button">Print / PDF</button>
+  </nav>
+  <p class="keyboard">← → to move · Home / End · N for notes</p>
+
+  <script>
+    (() => {
+      const slides = [...document.querySelectorAll('.slide')];
+      const counter = document.querySelector('#counter');
+      const previous = document.querySelector('#previous');
+      const next = document.querySelector('#next');
+      const notesToggle = document.querySelector('#notes-toggle');
+      const notesPanel = document.querySelector('#notes-panel');
+      let current = Math.max(0, Math.min(slides.length - 1, Number(location.hash.slice(1)) - 1 || 0));
+      let showNotes = false;
+      const render = () => {
+        slides.forEach((slide, index) => {
+          slide.classList.toggle('is-active', index === current);
+          slide.setAttribute('aria-hidden', String(index !== current));
+        });
+        counter.textContent = `${current + 1} / ${slides.length}`;
+        previous.disabled = current === 0;
+        next.disabled = current === slides.length - 1;
+        notesPanel.textContent = slides[current].querySelector('.notes').textContent;
+        notesPanel.hidden = !showNotes;
+        notesToggle.setAttribute('aria-expanded', String(showNotes));
+        history.replaceState(null, '', `#${current + 1}`);
+      };
+      const go = (index) => { current = Math.max(0, Math.min(slides.length - 1, index)); render(); };
+      previous.addEventListener('click', () => go(current - 1));
+      next.addEventListener('click', () => go(current + 1));
+      notesToggle.addEventListener('click', () => { showNotes = !showNotes; render(); });
+      document.querySelector('#print').addEventListener('click', () => window.print());
+      window.addEventListener('keydown', (event) => {
+        if (event.altKey || event.ctrlKey || event.metaKey || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;
+        if (event.key === 'ArrowRight' || event.key === 'PageDown' || event.key === ' ') { event.preventDefault(); go(current + 1); }
+        if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); go(current - 1); }
+        if (event.key === 'Home') { event.preventDefault(); go(0); }
+        if (event.key === 'End') { event.preventDefault(); go(slides.length - 1); }
+        if (event.key.toLowerCase() === 'n') { showNotes = !showNotes; render(); }
+      });
+      render();
+    })();
+  </script>
+</body>
+</html>

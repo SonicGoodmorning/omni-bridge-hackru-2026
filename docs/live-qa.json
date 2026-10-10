@@ -1,0 +1,265 @@
+{
+  "startedAt": "2026-10-10T18:06:42.406Z",
+  "cases": [
+    {
+      "name": "randomization-tr-TR",
+      "request": {
+        "mode": "consent",
+        "locale": "tr-TR",
+        "sectionId": "randomization"
+      },
+      "status": 200,
+      "wallMs": 28052,
+      "requestId": "qa-1",
+      "mode": "consent",
+      "locale": "tr-TR",
+      "engine": "live",
+      "studyVersion": "DEMO-1.0",
+      "sourceText": "If you join, a computer will assign you by chance to the investigational-tablet group or the placebo group. You have a 50% chance of being assigned to either group. Neither you nor the researcher chooses your group. You may receive a placebo, which contains no active study drug. The investigational tablet is not guaranteed to help you.",
+      "sourceSectionIds": [
+        "randomization"
+      ],
+      "translation": "Katılırsanız, bir bilgisayar sizi şansa bağlı olarak araştırma tableti grubuna veya plasebo grubuna atayacaktır. Her iki gruptan birine atanma şansınız %50'dir. Grubunuzu ne siz ne de araştırmacı seçer. Aktif çalışma ilacı içermeyen bir plasebo alabilirsiniz. Araştırma tabletinin size yardımcı olacağı garanti edilmez.",
+      "backTranslation": "If you participate, a computer will assign you by chance to either the study tablet group or the placebo group. You have a 50% chance of being assigned to either group. Neither you nor the investigator will choose your group. You may receive a placebo that does not contain active study drug. There is no guarantee that the study tablet will help you.",
+      "flags": [
+        {
+          "code": "REVIEW_AID",
+          "severity": "info",
+          "message": "Blind English rendering and checks are review aids, not proof of translation accuracy. Review the source before releasing."
+        }
+      ],
+      "visual": "RANDOMIZATION",
+      "elapsedMs": 28023,
+      "canRelease": true
+    },
+    {
+      "name": "randomization-es-419",
+      "request": {
+        "mode": "consent",
+        "locale": "es-419",
+        "sectionId": "randomization"
+      },
+      "status": 200,
+      "wallMs": 9008,
+      "requestId": "qa-2",
+      "mode": "consent",
+      "locale": "es-419",
+      "engine": "live",
+      "studyVersion": "DEMO-1.0",
+      "sourceText": "If you join, a computer will assign you by chance to the investigational-tablet group or the placebo group. You have a 50% chance of being assigned to either group. Neither you nor the researcher chooses your group. You may receive a placebo, which contains no active study drug. The investigational tablet is not guaranteed to help you.",
+      "sourceSectionIds": [
+        "randomization"
+      ],
+      "translation": "Si decide participar, una computadora le asignará al azar al grupo del comprimido de investigación o al grupo de placebo. Usted tiene un 50% de probabilidad de ser asignado a cualquiera de los dos grupos. Ni usted ni el investigador eligen su grupo. Usted podría recibir un placebo, el cual no contiene medicamento activo del estudio. No se garantiza que el comprimido de investigación le ayude.",
+      "backTranslation": "If you decide to participate, a computer will randomly assign you to the investigational tablet group or the placebo group. You have a 50% chance of being assigned to either group. Neither you nor the investigator choose your group. You could receive a placebo, which does not contain active study medication. The investigational tablet is not guaranteed to help you.",
+      "flags": [
+        {
+          "code": "REVIEW_AID",
+          "severity": "info",
+          "message": "Blind English rendering and checks are review aids, not proof of translation accuracy. Review the source before releasing."
+        }
+      ],
+      "visual": "RANDOMIZATION",
+      "elapsedMs": 9001,
+      "canRelease": true
+    },
+    {
+      "name": "randomization-pt-BR",
+      "request": {
+        "mode": "consent",
+        "locale": "pt-BR",
+        "sectionId": "randomization"
+      },
+      "status": 200,
+      "wallMs": 5451,
+      "requestId": "qa-3",
+      "mode": "consent",
+      "locale": "pt-BR",
+      "engine": "live",
+      "studyVersion": "DEMO-1.0",
+      "sourceText": "If you join, a computer will assign you by chance to the investigational-tablet group or the placebo group. You have a 50% chance of being assigned to either group. Neither you nor the researcher chooses your group. You may receive a placebo, which contains no active study drug. The investigational tablet is not guaranteed to help you.",
+      "sourceSectionIds": [
+        "randomization"
+      ],
+      "translation": "Se você participar, um computador colocará você por sorteio no grupo do comprimido em investigação ou no grupo do placebo. Você tem 50% de chance de ficar em qualquer um dos grupos. Nem você nem o pesquisador escolhem o seu grupo. Você pode receber um placebo, que não contém medicamento ativo do estudo. Não há garantia de que o comprimido em investigação ajudará você.",
+      "backTranslation": "If you participate, a computer will place you by chance into the investigational pill group or the placebo group. You have a 50% chance of being in either group. Neither you nor the researcher choose your group. You may receive a placebo, which does not contain active study medicine. There is no guarantee that the investigational pill will help you.",
+      "flags": [
+        {
+          "code": "REVIEW_AID",
+          "severity": "info",
+          "message": "Blind English rendering and checks are review aids, not proof of translation accuracy. Review the source before releasing."
+        }
+      ],
+      "visual": "RANDOMIZATION",
+      "elapsedMs": 5434,
+      "canRelease": true
+    },
+    {
+      "name": "randomization-hi-IN",
+      "request": {
+        "mode": "consent",
+        "locale": "hi-IN",
+        "sectionId": "randomization"
+      },
+      "status": 200,
+      "wallMs": 5126,
+      "requestId": "qa-4",
+      "mode": "consent",
+      "locale": "hi-IN",
+      "engine": "live",
+      "studyVersion": "DEMO-1.0",
+      "sourceText": "If you join, a computer will assign you by chance to the investigational-tablet group or the placebo group. You have a 50% chance of being assigned to either group. Neither you nor the researcher chooses your group. You may receive a placebo, which contains no active study drug. The investigational tablet is not guaranteed to help you.",
+      "sourceSectionIds": [
+        "randomization"
+      ],
+      "translation": "यदि आप शामिल होते हैं, तो एक कंप्यूटर आपको संयोग (भाग्य) से प्रायोगिक-गोली समूह या प्लसीबो समूह में निर्धारित करेगा। आपके पास किसी भी समूह में शामिल होने की 50% संभावना है। न तो आप और न ही शोधकर्ता आपके समूह का चयन करते हैं। आपको एक प्लसीबो मिल सकता है, जिसमें कोई सक्रिय अध्ययन दवा नहीं होती है। इस बात की कोई गारंटी नहीं है कि प्रायोगिक गोली से आपको लाभ होगा।",
+      "backTranslation": "If you join, a computer will assign you by chance (luck) to the experimental-pill group or the placebo group. You have a 50% chance of being in either group. Neither you nor the researchers choose your group. You may receive a placebo, which contains no active study medicine. There is no guarantee that you will benefit from the experimental pill.",
+      "flags": [
+        {
+          "code": "REVIEW_AID",
+          "severity": "info",
+          "message": "Blind English rendering and checks are review aids, not proof of translation accuracy. Review the source before releasing."
+        }
+      ],
+      "visual": "RANDOMIZATION",
+      "elapsedMs": 5118,
+      "canRelease": true
+    },
+    {
+      "name": "randomization-zh-CN",
+      "request": {
+        "mode": "consent",
+        "locale": "zh-CN",
+        "sectionId": "randomization"
+      },
+      "status": 429,
+      "wallMs": 2738,
+      "error": {
+        "code": "RATE_LIMITED",
+        "message": "The live engine is busy or its quota is exhausted. Wait briefly and retry, or explicitly choose Sample mode.",
+        "retryable": true
+      }
+    },
+    {
+      "name": "purpose-tr-TR",
+      "request": {
+        "mode": "consent",
+        "locale": "tr-TR",
+        "sectionId": "purpose"
+      },
+      "status": 429,
+      "wallMs": 213,
+      "error": {
+        "code": "RATE_LIMITED",
+        "message": "The live engine is busy or its quota is exhausted. Wait briefly and retry, or explicitly choose Sample mode.",
+        "retryable": true
+      }
+    },
+    {
+      "name": "procedures-tr-TR",
+      "request": {
+        "mode": "consent",
+        "locale": "tr-TR",
+        "sectionId": "procedures"
+      },
+      "status": 429,
+      "wallMs": 173,
+      "error": {
+        "code": "RATE_LIMITED",
+        "message": "The live engine is busy or its quota is exhausted. Wait briefly and retry, or explicitly choose Sample mode.",
+        "retryable": true
+      }
+    },
+    {
+      "name": "risks-tr-TR",
+      "request": {
+        "mode": "consent",
+        "locale": "tr-TR",
+        "sectionId": "risks"
+      },
+      "status": 429,
+      "wallMs": 170,
+      "error": {
+        "code": "RATE_LIMITED",
+        "message": "The live engine is busy or its quota is exhausted. Wait briefly and retry, or explicitly choose Sample mode.",
+        "retryable": true
+      }
+    },
+    {
+      "name": "voluntary-tr-TR",
+      "request": {
+        "mode": "consent",
+        "locale": "tr-TR",
+        "sectionId": "voluntary"
+      },
+      "status": 429,
+      "wallMs": 146,
+      "error": {
+        "code": "RATE_LIMITED",
+        "message": "The live engine is busy or its quota is exhausted. Wait briefly and retry, or explicitly choose Sample mode.",
+        "retryable": true
+      }
+    },
+    {
+      "name": "withdrawal-tr-TR",
+      "request": {
+        "mode": "consent",
+        "locale": "tr-TR",
+        "sectionId": "withdrawal"
+      },
+      "status": 429,
+      "wallMs": 158,
+      "error": {
+        "code": "RATE_LIMITED",
+        "message": "The live engine is busy or its quota is exhausted. Wait briefly and retry, or explicitly choose Sample mode.",
+        "retryable": true
+      }
+    },
+    {
+      "name": "conversation-tr-TR",
+      "request": {
+        "mode": "conversation",
+        "locale": "tr-TR",
+        "text": "You have a 50% chance of being assigned to either group. Neither you nor the researcher chooses the group. You may receive a placebo, which has no active study drug."
+      },
+      "status": 429,
+      "wallMs": 150,
+      "error": {
+        "code": "RATE_LIMITED",
+        "message": "The live engine is busy or its quota is exhausted. Wait briefly and retry, or explicitly choose Sample mode.",
+        "retryable": true
+      }
+    },
+    {
+      "name": "contradiction-tr-TR",
+      "request": {
+        "mode": "conversation",
+        "locale": "tr-TR",
+        "text": "The researcher will choose your group. You have a 100% chance of receiving the active drug."
+      },
+      "status": 429,
+      "wallMs": 154,
+      "error": {
+        "code": "RATE_LIMITED",
+        "message": "The live engine is busy or its quota is exhausted. Wait briefly and retry, or explicitly choose Sample mode.",
+        "retryable": true
+      }
+    },
+    {
+      "name": "out-of-source-question-tr-TR",
+      "request": {
+        "mode": "conversation",
+        "locale": "tr-TR",
+        "text": "What happens to the information already collected if I leave?"
+      },
+      "status": 429,
+      "wallMs": 142,
+      "error": {
+        "code": "RATE_LIMITED",
+        "message": "The live engine is busy or its quota is exhausted. Wait briefly and retry, or explicitly choose Sample mode.",
+        "retryable": true
+      }
+    }
+  ],
+  "finishedAt": "2026-10-10T18:07:34.099Z"
+}

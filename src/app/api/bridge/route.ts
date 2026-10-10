@@ -1,0 +1,30 @@
+import { executeBridge } from "@/lib/bridge/engine";
+import { BridgeServiceError } from "@/lib/bridge/errors";
+import { createGeminiTransport } from "@/lib/bridge/gemini";
+import type { BridgeError } from "@/lib/types";
+
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
+export async function POST(request: Request) {
+  const headers = { "Cache-Control": "no-store" };
+  try {
+    const length = Number(request.headers.get("content-length"));
+    if (Number.isFinite(length) && length > 24_000) throw new BridgeServiceError("INVALID_REQUEST", "The request is too large.", 400, false);
+    const body = await request.text();
+    if (body.length > 24_000) throw new BridgeServiceError("INVALID_REQUEST", "The request is too large.", 400, false);
+    let input: unknown;
+    try { input = JSON.parse(body); } catch { throw new BridgeServiceError("INVALID_REQUEST", "Send a valid JSON request.", 400, false); }
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
+    const result = await executeBridge(input, {
+      transport: apiKey ? createGeminiTransport(apiKey) : undefined,
+      model: process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash",
+      signal: request.signal,
+    });
+    return Response.json(result, { headers });
+  } catch (error) {
+    const failure = error instanceof BridgeServiceError ? error : new BridgeServiceError("INTERNAL_ERROR", "The request could not be completed. Nothing new was released.", 500, true);
+    const body: BridgeError = { error: { code: failure.code, message: failure.message, retryable: failure.retryable } };
+    return Response.json(body, { status: failure.status, headers });
+  }
+}
