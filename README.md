@@ -9,7 +9,7 @@ Both modes keep the source visible, show an English back-translation for coordin
 
 [Public source repository](https://github.com/SonicGoodmorning/omni-bridge-hackru-2026)
 
-[Hosted sample preview](https://temporary-express-monsoon-5gkbxhw.vercel.app) — created October 10, 2026; Vercel reports that the initially temporary deployment has been claimed. The hosted preview has no Gemini key configured, so use **Sample mode** there.
+[Latest Vercel preview](https://express-monsoon-5gkbxhw-f3mutifxo-egegoodmorning-6248.vercel.app) — includes the final layout correction and requires Vercel authentication. The earlier [sample deployment](https://temporary-express-monsoon-5gkbxhw.vercel.app) was initially temporary and has been claimed. Both provide **Sample mode**; a private server environment variable enables live Gemini separately.
 
 ## Run locally
 
