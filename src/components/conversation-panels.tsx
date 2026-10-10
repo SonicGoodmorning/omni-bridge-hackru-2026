@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode, type KeyboardEvent } from 
 import type { VisitTurn } from "@/hooks/use-visits";
 import type { Locale } from "@/lib/types";
 
-function containModalFocus(event: KeyboardEvent<HTMLDialogElement>) {
+export function containModalFocus(event: KeyboardEvent<HTMLDialogElement>) {
   if (event.key !== "Tab" || !event.currentTarget.matches(":modal")) return;
   const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
     'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex="0"]',

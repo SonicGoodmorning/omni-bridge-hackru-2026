@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import { SavedConversations } from "./saved-conversations";
 import { Icon } from "./icons";
 import { useSession, type TextSize } from "./session-provider";
 import { LANGUAGES, type Engine, type Locale } from "@/lib/types";
@@ -11,6 +12,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const session = useSession();
   const pathname = usePathname();
   const [ready, setReady] = useState(false);
+  const [savedOpen, setSavedOpen] = useState(false);
   const [menu, setMenu] = useState(false);
   const [preferences, setPreferences] = useState(false);
   const [help, setHelp] = useState(false);
@@ -37,15 +39,16 @@ export function AppShell({ children }: { children: ReactNode }) {
               <button onClick={() => { setPreferences(true); setHelp(false); setMenu(false); }}>Reading preferences</button>
               <button onClick={() => { setHelp(true); setPreferences(false); setMenu(false); }}>Help</button>
               <button onClick={() => { session.reset(); setMenu(false); }}>New session</button>
-              <button onClick={() => { session.reset(); setMenu(false); }}>Delete saved conversation</button>
-              <p className="storage-menu-note">New session clears the saved conversation. One conversation is kept on this browser only.</p>
+              <button onClick={() => { setSavedOpen(true); setMenu(false); }}>Saved conversations</button>
+              <p className="storage-menu-note">New session keeps earlier shared conversations in Saved conversations.</p>
             </div>}
           </div>
         </div>
       </div>
       {preferences && <section className="shared-disclosure" id="reading-preferences" aria-label="Reading preferences" onKeyDown={(event) => { if (event.key === "Escape") setPreferences(false); }}><div><strong>Make the text comfortable to read.</strong><p>Text size changes the display and keeps your reviewed explanation.</p></div><label>Text size<select autoFocus aria-label="Text size" value={session.textSize} onChange={(event) => session.setTextSize(event.target.value as TextSize)}><option value="standard">Standard</option><option value="large">Large</option><option value="extra-large">Extra large</option></select></label><button className="text-button" onClick={() => setPreferences(false)}>Done</button></section>}
-      {help && <section className="shared-disclosure" id="shared-help" aria-label="Prototype information"><div><strong>A tool for a fictional discussion.</strong><p>Use public or fictional demo text only. This prototype does not provide medical advice, obtain consent, or replace a qualified interpreter. It is not monitored for urgent care. Live text goes to Gemini; browser speech may use a remote service. Shared conversation turns save automatically in this browser and survive refresh. Drafts, document explanations, and questions are not saved. New session, changing language, engine, or document source clears the saved conversation. Browser storage is not encrypted; use fictional text only. Private browsing or clearing site data may remove saved turns. Different preview URLs have separate storage.</p></div><button className="text-button" onClick={() => setHelp(false)}>Close</button></section>}
+      {help && <section className="shared-disclosure" id="shared-help" aria-label="Prototype information"><div><strong>A tool for a fictional discussion.</strong><p>Use public or fictional demo text only. This prototype does not provide medical advice, obtain consent, or replace a qualified interpreter. It is not monitored for urgent care. Live text goes to Gemini; browser speech may use a remote service. Shared conversation turns save automatically in this browser and survive refresh. Drafts, document explanations, and questions are not saved. New session or changing language, engine, or document source starts fresh while keeping previous shared conversations in Saved conversations. Open, rename, or delete them from Menu. Browser storage is not encrypted; use fictional text only. Private browsing or clearing site data may remove saved turns. Different preview URLs have separate storage.</p></div><button className="text-button" onClick={() => setHelp(false)}>Close</button></section>}
     </header>
+    {savedOpen && <SavedConversations onDismiss={() => setSavedOpen(false)} />}
     <div id="workspace-content" tabIndex={-1}>{children}</div>
   </div>;
 }

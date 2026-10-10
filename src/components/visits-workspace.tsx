@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SavedConversations } from "./saved-conversations";
 import { ParticipantDisplay, ReviewPanel } from "./conversation-panels";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/icons";
@@ -48,6 +49,7 @@ export function VisitsWorkspace() {
   const [ready, setReady] = useState(false);
   const [samplesOpen, setSamplesOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(true);
+  const [savedOpen, setSavedOpen] = useState(false);
   const [displayOpen, setDisplayOpen] = useState(false);
   const selectedSpeaker = session.composerSpeaker;
   const selectedSpeakerRef = useRef(selectedSpeaker); selectedSpeakerRef.current = selectedSpeaker;
@@ -154,9 +156,9 @@ export function VisitsWorkspace() {
 
   return <div className="visits-shell" inert={!ready}>
       <main className={`visits-main ${reviewOpen && (busy || state.error || result) ? "has-review" : ""}`}>
-        <div className="conversation-heading"><div><p className="eyebrow">ENGLISH ↔ {language.nativeName}</p><h1>Conversation</h1></div><div className="conversation-heading-actions"><button className="text-button" aria-expanded={samplesOpen} onClick={() => setSamplesOpen(!samplesOpen)}>Try a sample</button><button className="text-button" disabled={!state.turns.length} onClick={() => { cancelRecording(); stopPlayback(); setDisplayOpen(true); }}>Participant display</button></div></div>
+        <div className="conversation-heading"><div><p className="eyebrow">ENGLISH ↔ {language.nativeName}</p><h1>Conversation</h1></div><div className="conversation-heading-actions"><button className="text-button" onClick={() => { cancelRecording(); stopPlayback(); setSavedOpen(true); }}>Saved conversations</button><button className="text-button" aria-expanded={samplesOpen} onClick={() => setSamplesOpen(!samplesOpen)}>Try a sample</button><button className="text-button" disabled={!state.turns.length} onClick={() => { cancelRecording(); stopPlayback(); setDisplayOpen(true); }}>Participant display</button></div></div>
         {session.questionOrigin && <aside className="question-origin" aria-label="Question source"><details><summary>{session.questionOrigin.title} · Question source</summary><blockquote>{session.questionOrigin.quote}</blockquote><p>A person answers this question; Omni-Bridge translates.</p></details><Link className="text-button" onClick={() => session.setDocumentView("source")} href={`/documents#source-${session.questionOrigin.paragraphId}`}>Return to source<Icon name="arrow" size={14} /></Link></aside>}
-        {samplesOpen && <div className="visit-sample-bar"><div><Icon name="document" size={17} /><span><strong>Fictional CLEAR conversation</strong><small>{SAMPLE_VISIT.length} prepared turns. Selecting a sample switches the engine to Sample mode.</small></span></div><div className="visit-sample-actions"><button className="text-button" onClick={useNextSample}>Use next sample turn <span className="visit-sample-count">{state.sampleCursor % SAMPLE_VISIT.length + 1}/{SAMPLE_VISIT.length}</span><Icon name="arrow" size={14} /></button><button className="text-button" onClick={openPrepared}>Open prepared conversation</button><small>Loading the full example replaces the shared conversation.</small></div></div>}
+        {samplesOpen && <div className="visit-sample-bar"><div><Icon name="document" size={17} /><span><strong>Fictional CLEAR conversation</strong><small>{SAMPLE_VISIT.length} prepared turns. Selecting a sample switches the engine to Sample mode.</small></span></div><div className="visit-sample-actions"><button className="text-button" onClick={useNextSample}>Use next sample turn <span className="visit-sample-count">{state.sampleCursor % SAMPLE_VISIT.length + 1}/{SAMPLE_VISIT.length}</span><Icon name="arrow" size={14} /></button><button className="text-button" onClick={openPrepared}>Open prepared conversation</button><small>Loading the full example starts a separate sample. Earlier saved conversations are kept.</small></div></div>}
         <div className="conversation-layout">
         <div className="visit-speakers">
           <div className="composer-switch" role="group" aria-label="Speaking as">{(["clinician", "participant"] as const).map((role) => <button key={role} aria-pressed={selectedSpeaker === role} onClick={() => { if (role !== selectedSpeaker) { cancelRecording(); stopPlayback(); session.selectSpeaker(role); } }}>{role === "clinician" ? "Clinician" : "Participant"}<span>{role === "clinician" ? "English" : language.nativeName}</span></button>)}</div>
@@ -203,6 +205,7 @@ export function VisitsWorkspace() {
         </div>
         <footer className="visit-footer"><span><Icon name="help" size={14} />Synthetic education prototype · No real patient information</span><span>Review each translation before sharing.</span><span role="status">{session.storageMessage}</span></footer>
       </main>
+      {savedOpen && <SavedConversations onDismiss={() => setSavedOpen(false)} />}
       {displayOpen && state.turns.length > 0 && <ParticipantDisplay turns={state.turns} locale={state.locale} onDismiss={() => setDisplayOpen(false)} />}
   </div>;
 }

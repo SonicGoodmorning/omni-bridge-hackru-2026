@@ -39,3 +39,37 @@ export function serializeConversation(saved: SavedConversation): string {
   if (raw.length > MAX_SAVED_BYTES) throw new Error("Conversation is too large to save");
   return raw;
 }
+
+export const HISTORY_STORAGE_KEY = "omnibridge.conversations.v2";
+export const conversationEntrySchema = z.object({
+  id: z.string().min(1).max(200),
+  title: z.string().trim().min(1).max(80),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+  conversation: savedConversationSchema,
+}).strict();
+export const conversationLibrarySchema = z.object({
+  version: z.literal(2),
+  activeId: z.string().nullable(),
+  conversations: z.array(conversationEntrySchema).max(100),
+}).strict().superRefine((library, context) => {
+  const ids = new Set(library.conversations.map((entry) => entry.id));
+  if (ids.size !== library.conversations.length || (library.activeId !== null && !ids.has(library.activeId))) {
+    context.addIssue({ code: "custom", message: "Invalid conversation library identity" });
+  }
+});
+export type ConversationEntry = z.infer<typeof conversationEntrySchema>;
+export type ConversationLibrary = z.infer<typeof conversationLibrarySchema>;
+export function emptyConversationLibrary(): ConversationLibrary { return { version: 2, activeId: null, conversations: [] }; }
+export function parseConversationLibrary(raw: string): ConversationLibrary {
+  if (raw.length > MAX_SAVED_BYTES) throw new Error("Conversation history is too large");
+  return conversationLibrarySchema.parse(JSON.parse(raw));
+}
+export function serializeConversationLibrary(library: ConversationLibrary): string {
+  const raw = JSON.stringify(conversationLibrarySchema.parse(library));
+  if (raw.length > MAX_SAVED_BYTES) throw new Error("Conversation history is full");
+  return raw;
+}
+export function migrateConversation(saved: SavedConversation, id: string, now: string): ConversationLibrary {
+  return { version: 2, activeId: id, conversations: [{ id, title: "Previous conversation", createdAt: now, updatedAt: now, conversation: saved }] };
+}
