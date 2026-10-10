@@ -1,12 +1,14 @@
 "use client";
 
-import { createContext, useContext, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { useBridge } from "@/hooks/use-bridge";
 import { SAMPLE_VISIT } from "@/lib/visits/sample";
 import type { VisitSpeaker } from "@/lib/visits/types";
 import { useVisits } from "@/hooks/use-visits";
 import { useDocuments } from "@/hooks/use-documents";
 import type { Engine, Locale } from "@/lib/types";
+
+import { CONVERSATION_STORAGE_KEY, parseSavedConversation, serializeConversation } from "@/lib/local-conversation";
 
 export type SourceKind = "consent" | "visit-summary" | "paste";
 export type TextSize = "standard" | "large" | "extra-large";
@@ -32,6 +34,46 @@ function useSessionController(liveAvailable: boolean) {
   const documentScroll = useRef<Record<DocumentView, number>>({ source: 0, review: 0, participant: 0 });
   const locale = bridgeController.state.locale;
   const engine = bridgeController.state.engine;
+  const [storageReady, setStorageReady] = useState(false);
+  const [storageMessage, setStorageMessage] = useState("Loading saved conversation…");
+  const storageLoaded = useRef(false);
+  const storageReadFailed = useRef(false);
+  useEffect(() => {
+    if (storageLoaded.current) return;
+    storageLoaded.current = true;
+    try {
+      const raw = localStorage.getItem(CONVERSATION_STORAGE_KEY);
+      if (raw) {
+        const saved = parseSavedConversation(raw);
+        bridgeController.setLocale(saved.locale); documentController.setLocale(saved.locale);
+        bridgeController.setEngine(saved.engine); documentController.setEngine(saved.engine);
+        visitController.restore(saved);
+      }
+    } catch {
+      storageReadFailed.current = true;
+      setStorageMessage("Saved data could not be loaded. Use Delete saved conversation in Menu to clear it.");
+      // Leave invalid data untouched until the user explicitly deletes or replaces it.
+      return;
+    } finally { setStorageReady(true); }
+  // Load once after hydration; restoring never starts a model request.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const savedTurns = visitController.state.turns;
+  useEffect(() => {
+    if (!storageReady || (storageReadFailed.current && !savedTurns.length)) return;
+    try {
+      if (savedTurns.length) {
+        localStorage.setItem(CONVERSATION_STORAGE_KEY, serializeConversation({ version: 1,
+          locale: visitController.state.locale, engine: visitController.state.engine, turns: savedTurns }));
+        storageReadFailed.current = false;
+        setStorageMessage("Shared conversation saved in this browser.");
+      } else {
+        localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+        setStorageMessage("Shared turns save automatically in this browser. Drafts are not saved.");
+      }
+    } catch { setStorageMessage("Browser saving is unavailable or full. This conversation is only in memory."); }
+  }, [storageReady, savedTurns, visitController.state.locale, visitController.state.engine]);
+
 
   function clearQuestions() { setQuestionOrigin(null); setQuestionDraft(""); setQuestionParagraph(""); }
   function setLocale(value: Locale) {
@@ -54,7 +96,12 @@ function useSessionController(liveAvailable: boolean) {
     if (value === sourceKind) return;
     clearWork(); setSource(value);
   }
-  function reset() { clearWork(); setSource("consent"); }
+  function reset() {
+    storageReadFailed.current = false;
+    clearWork(); setSource("consent");
+    try { localStorage.removeItem(CONVERSATION_STORAGE_KEY); setStorageMessage("Saved conversation deleted. Shared turns will save automatically."); }
+    catch { setStorageMessage("Could not delete browser data. Clear this site’s storage in your browser settings."); }
+  }
   function discussQuestion(text: string, origin: QuestionOrigin) {
     visitController.cancel();
     setComposerSpeaker("participant");
@@ -68,7 +115,7 @@ function useSessionController(liveAvailable: boolean) {
     nextSample: () => { setComposerSpeaker(SAMPLE_VISIT[visitController.state.sampleCursor % SAMPLE_VISIT.length].speaker); setQuestionOrigin(null); setEngine("sample"); visitController.nextSample(); },
     openPrepared: () => { setComposerSpeaker("clinician"); setQuestionOrigin(null); setEngine("sample"); visitController.openPrepared(); },
   };
-  return { liveAvailable, locale, engine, composerSpeaker, selectSpeaker, textSize, setLocale, setEngine, setTextSize,
+  return { liveAvailable, storageReady, storageMessage, locale, engine, composerSpeaker, selectSpeaker, textSize, setLocale, setEngine, setTextSize,
     sourceKind, setSourceKind, sessionEpoch, reset, bridge, documents, visits,
     questionOrigin, questionDraft, setQuestionDraft, questionParagraph, setQuestionParagraph, discussQuestion,
     documentView, setDocumentView, documentScroll };

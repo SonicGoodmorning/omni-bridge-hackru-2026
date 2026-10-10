@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useReducer, useRef } from "react";
+import type { SavedConversation } from "@/lib/local-conversation";
 import type { Engine, Locale } from "@/lib/types";
 import { SAMPLE_VISIT } from "@/lib/visits/sample";
 import { visitResultSchema, type VisitRequest, type VisitResult } from "@/lib/visits/types";
@@ -41,6 +42,7 @@ type Action =
   | { type: "share" }
   | { type: "cancel" }
   | { type: "reset" }
+  | { type: "restore"; saved: SavedConversation }
   | { type: "next-sample" }
   | { type: "prepared"; turns: VisitTurn[] };
 
@@ -66,6 +68,7 @@ function reducer(state: VisitState, action: Action): VisitState {
       return { ...state, ...clearReview, drafts: { ...state.drafts, [result.speaker]: "" }, turns: [...state.turns, { id: result.requestId, speaker: result.speaker, sourceText: result.sourceText, translation: result.translation, sourceLanguage: result.sourceLanguage, targetLanguage: result.targetLanguage, engine: result.engine, prepared: false }] };
     }
     case "cancel": return { ...state, ...clearReview };
+    case "restore": return { ...state, ...clearReview, locale: action.saved.locale, engine: action.saved.engine, drafts: emptyDrafts(), turns: action.saved.turns, sampleCursor: 0 };
     case "reset": return { ...state, ...clearReview, drafts: emptyDrafts(), turns: [], sampleCursor: 0 };
     case "next-sample": {
       const turn = SAMPLE_VISIT[state.sampleCursor % SAMPLE_VISIT.length];
@@ -130,7 +133,9 @@ export function useVisits(liveAvailable: boolean) {
     invalidate({ type: "prepared", turns });
   }, [invalidate]);
 
-  return { state, setDraft, setLocale, setEngine, translate, openPrepared,
+  const restore = useCallback((saved: SavedConversation) => invalidate({ type: "restore", saved }), [invalidate]);
+
+  return { state, restore, setDraft, setLocale, setEngine, translate, openPrepared,
     nextSample: () => invalidate({ type: "next-sample" }),
     cancel: () => invalidate({ type: "cancel" }),
     reset: () => invalidate({ type: "reset" }),

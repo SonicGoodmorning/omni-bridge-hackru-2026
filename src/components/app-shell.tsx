@@ -19,7 +19,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     function outside(event: MouseEvent) { if (event.target instanceof Element && !event.target.closest(".shared-menu-wrap")) setMenu(false); }
     document.addEventListener("click", outside); return () => document.removeEventListener("click", outside);
   }, []);
-  return <div className={`shared-app text-size-${session.textSize}`} inert={!ready}>
+  return <div className={`shared-app text-size-${session.textSize}`} inert={!ready || !session.storageReady}>
     <a className="skip-link" href="#workspace-content">Skip to workspace</a>
     <header className="shared-header">
       <div className="shared-header-top">
@@ -37,12 +37,14 @@ export function AppShell({ children }: { children: ReactNode }) {
               <button onClick={() => { setPreferences(true); setHelp(false); setMenu(false); }}>Reading preferences</button>
               <button onClick={() => { setHelp(true); setPreferences(false); setMenu(false); }}>Help</button>
               <button onClick={() => { session.reset(); setMenu(false); }}>New session</button>
+              <button onClick={() => { session.reset(); setMenu(false); }}>Delete saved conversation</button>
+              <p className="storage-menu-note">New session clears the saved conversation. One conversation is kept on this browser only.</p>
             </div>}
           </div>
         </div>
       </div>
       {preferences && <section className="shared-disclosure" id="reading-preferences" aria-label="Reading preferences" onKeyDown={(event) => { if (event.key === "Escape") setPreferences(false); }}><div><strong>Make the text comfortable to read.</strong><p>Text size changes the display and keeps your reviewed explanation.</p></div><label>Text size<select autoFocus aria-label="Text size" value={session.textSize} onChange={(event) => session.setTextSize(event.target.value as TextSize)}><option value="standard">Standard</option><option value="large">Large</option><option value="extra-large">Extra large</option></select></label><button className="text-button" onClick={() => setPreferences(false)}>Done</button></section>}
-      {help && <section className="shared-disclosure" id="shared-help" aria-label="Prototype information"><div><strong>A tool for a fictional discussion.</strong><p>Use public or fictional demo text only. This prototype does not provide medical advice, obtain consent, or replace a qualified interpreter. It is not monitored for urgent care. Live text goes to Gemini; browser speech may use a remote service. Session work stays in memory until reset or refresh.</p></div><button className="text-button" onClick={() => setHelp(false)}>Close</button></section>}
+      {help && <section className="shared-disclosure" id="shared-help" aria-label="Prototype information"><div><strong>A tool for a fictional discussion.</strong><p>Use public or fictional demo text only. This prototype does not provide medical advice, obtain consent, or replace a qualified interpreter. It is not monitored for urgent care. Live text goes to Gemini; browser speech may use a remote service. Shared conversation turns save automatically in this browser and survive refresh. Drafts, document explanations, and questions are not saved. New session, changing language, engine, or document source clears the saved conversation. Browser storage is not encrypted; use fictional text only. Private browsing or clearing site data may remove saved turns. Different preview URLs have separate storage.</p></div><button className="text-button" onClick={() => setHelp(false)}>Close</button></section>}
     </header>
     <div id="workspace-content" tabIndex={-1}>{children}</div>
   </div>;

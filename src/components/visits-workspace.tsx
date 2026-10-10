@@ -201,7 +201,7 @@ export function VisitsWorkspace() {
           {playbackMessage && <p className="visit-audio-message" role="status">{playbackMessage}</p>}
         </section>
         </div>
-        <footer className="visit-footer"><span><Icon name="help" size={14} />Synthetic education prototype · No real patient information</span><span>Review each translation before sharing.</span><span>Turns stay in this session until you reset or refresh.</span></footer>
+        <footer className="visit-footer"><span><Icon name="help" size={14} />Synthetic education prototype · No real patient information</span><span>Review each translation before sharing.</span><span role="status">{session.storageMessage}</span></footer>
       </main>
       {displayOpen && state.turns.length > 0 && <ParticipantDisplay turns={state.turns} locale={state.locale} onDismiss={() => setDisplayOpen(false)} />}
   </div>;
