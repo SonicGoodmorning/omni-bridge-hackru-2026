@@ -48,7 +48,7 @@ Gemini 3.1 Pro assisted early planning. Codex assisted implementation, tests, de
 ## Links
 - Source: https://github.com/SonicGoodmorning/omni-bridge-hackru-2026
 - Video download: https://github.com/SonicGoodmorning/omni-bridge-hackru-2026/raw/refs/heads/main/docs/demo.webm
-- Slide PDF: https://github.com/SonicGoodmorning/omni-bridge-hackru-2026/blob/main/docs/demo-slides.pdf
+- Slide PDF: https://raw.githubusercontent.com/SonicGoodmorning/omni-bridge-hackru-2026/main/docs/demo-slides.pdf
 - Final protected deployment and validation: see [submission release](submission-release.md).
 
 The video link is a WebM download, not a guaranteed Devpost video embed. If the form requires a supported video-host URL, the team must upload the supplied video to its own account and use that URL. Do not submit a placeholder. Verify all links signed out after the final source push.

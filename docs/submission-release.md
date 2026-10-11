@@ -46,6 +46,10 @@ npm run start -- --port 3003
 
 Open http://localhost:3003/documents and choose Turkish and Sample mode. Prepare CLEAR randomization, inspect source and review aids, then explicitly share. Use Conversation's Try a sample → Open prepared conversation for the clearly labeled no-key backup. Arbitrary new questions require a private `GEMINI_API_KEY` in `.env.local`; never put it in Devpost or source. Sample mode does not provide an offline action-plan generator.
 
+## Public handoff verification
+
+Source and refreshed media were published to `main`. Signed-out HTTP checks returned 200 for the repository, video download, submission copy, and direct PDF. GitHub’s PDF preview briefly returned 503, so the submission copy uses the verified direct download. The protected app still redirects signed-out visitors to Vercel login.
+
 ## Team-owned checks still pending
 
 - All registrations and contributor invitations, no cross-submission, authenticated Devpost fields and final Submit confirmation.
