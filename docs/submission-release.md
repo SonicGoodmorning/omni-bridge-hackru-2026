@@ -6,7 +6,7 @@ Release preparation: October 10, 2026 (Eastern). This record distinguishes obser
 
 - Protected preview: https://express-monsoon-5gkbxhw-2phuvkhv0-egegoodmorning-6248.vercel.app
 - Source: https://github.com/SonicGoodmorning/omni-bridge-hackru-2026
-- The exact release source revision is the commit containing this file (`git rev-parse HEAD` in the submitted checkout). Later documentation-only commits may follow; use Git history to identify the release.
+- Application source revision: `5f52ef7`. This revision passed clean-checkout installation, 62 unit tests, production build, six sample API language checks, and no-key browser review/share. Later commits update submission evidence and media without changing application source.
 - Vercel reported READY after a successful Next.js build. Signed-out access redirects to Vercel login; authenticated in-app browser access opens SayAhh. Authentication protection was retained.
 - The team chose laptop-only interactive judging. No public unauthenticated app or judge credentials are offered.
 
@@ -17,9 +17,11 @@ Release preparation: October 10, 2026 (Eastern). This record distinguishes obser
 | Unit tests | 62 passed; includes explicit locale-mismatch rejection and non-vacuous review/retry tests |
 | TypeScript | Passed `npm run typecheck` |
 | Production build | Passed `npm run build`; Next.js 16.4.0 |
-| Browser cases | 38 passed in full run, final mobile case passed separately after its selector correction; 39 distinct cases verified |
+| Browser cases | 39 passed in the final full run (35.1 seconds) |
 | Browser scope | Six-language prepared document/display paths, review gates, stale responses, storage restoration/deletion, mobile layout, mocked speech and provider failure |
 | Hosted live workflow | Turkish CLEAR explanation, participant question into English, coordinator reply into Turkish, explicit sharing, and restoration of both shared turns after refresh passed in the authenticated browser |
+| Clean checkout | `npm ci`, 62 unit tests, production build, six sample API languages, and browser review/share passed without a Gemini key; Live option disabled |
+| Recording | Fresh 160.76-second captioned video; three actual HTTP 200 Live Gemini operations and one labeled sample; six representative frames visually inspected |
 | Slides | 11-page PDF exported; all slides checked for overflow and visually inspected |
 | Credential-shaped literals | None found in tracked/unignored small text files; private environment files excluded by Git and Vercel ignore rules |
 

@@ -2,7 +2,7 @@
 
 Use the team's tested laptop and one shared browser session. Begin with the fictional CLEAR trial, then show the participant asking a question and the human coordinator replying. The original document remains visible. A fictional outpatient note is a short second-source example, not a real prescription or patient record.
 
-Preflight the deployed URL, Vercel access, network, and Gemini quota. Use Turkish for the main story because a teammate can inspect it directly; do not claim completed qualified language review. Keep typing available even if the microphone works. Use [the editable 11-slide HTML deck](demo-slides.html).
+Preflight the deployed URL, Vercel access, network, and Gemini quota. Use Turkish for the main story because a teammate can inspect it directly; do not claim completed qualified language review. Keep typing available even if the microphone works. Use [the editable 11-slide HTML deck](demo-slides.html). The refreshed recording uses a source-linked “Can you explain this part?” question and a coordinator explanation of random assignment; the voluntary-participation exchange below is an alternative rehearsal.
 
 ## Recording plan
 
@@ -60,7 +60,7 @@ The outpatient note has a prepared fixture. Arbitrary pasted synthetic text need
 
 ## Submission materials
 
-Regeneron suggests roughly three minutes of video and 10–12 slides. The updated HTML deck contains 11 slides. The current PDF has 11 rendered and visually inspected pages. The silent captioned recording is 2 minutes 40.68 seconds and includes actual live trial, participant-question, and coordinator-reply operations, followed by a labeled visit-note sample. See [capture metadata](demo-capture.json) and [actual responses](integrated-demo-qa.json). The recording script operates review controls for demonstration; it does not establish human language review. Team review and narration remain available before submission.
+Regeneron suggests roughly three minutes of video and 10–12 slides. The updated HTML deck contains 11 slides. The current PDF has 11 rendered and visually inspected pages. The silent captioned recording is 2 minutes 40.76 seconds and includes actual live trial, participant-question, and coordinator-reply operations, followed by a labeled visit-note sample. See [capture metadata](demo-capture.json) and [actual responses](integrated-demo-qa.json). The recording script operates review controls for demonstration; it does not establish human language review. Team review and narration remain available before submission.
 
 Use [the guidelines check](guidelines.md) for the one-track/two-superlative limit, build-period provenance, and schedule conflicts. Treat 10 a.m. Eastern on Sunday, October 11 as the conservative submission/build cutoff and confirm judging on site. Complete Devpost fields, list every teammate, review the AI-assistance disclosure, and verify judge access to all links.
 

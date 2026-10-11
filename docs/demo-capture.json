@@ -1,6 +1,6 @@
 {
-  "capturedAt": "2026-10-10T19:51:20.365Z",
-  "durationSeconds": 160.68,
+  "capturedAt": "2026-10-11T02:18:18.477Z",
+  "durationSeconds": 160.76,
   "width": 1440,
   "height": 960,
   "liveSegment": true,
@@ -8,5 +8,7 @@
   "sampleOperations": 1,
   "captioned": true,
   "audio": false,
-  "syntheticTypedInput": true
+  "syntheticTypedInput": true,
+  "sourceCommit": "5f52ef7",
+  "review": "Six representative frames visually inspected; real API response record retained. Automated review controls are not qualified language approval."
 }

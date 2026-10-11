@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-10-10T19:50:05.327Z",
+  "recordedAt": "2026-10-11T02:18:18.477Z",
   "model": "gemini-3.5-flash-lite",
   "liveRecording": true,
   "notes": "Actual application API responses; captions only are recording overlays. Typed synthetic inputs; no microphone or qualified language review.",
@@ -8,14 +8,14 @@
       "route": "/api/bridge",
       "status": 200,
       "request": {
-        "requestId": "a3607c71-4837-4cae-b210-2568d508fa90",
+        "requestId": "cfca4195-ecd4-437b-b9ae-384f6b6bad0c",
         "mode": "consent",
         "locale": "tr-TR",
         "engine": "live",
         "sectionId": "randomization"
       },
       "result": {
-        "requestId": "a3607c71-4837-4cae-b210-2568d508fa90",
+        "requestId": "cfca4195-ecd4-437b-b9ae-384f6b6bad0c",
         "mode": "consent",
         "locale": "tr-TR",
         "engine": "live",
@@ -24,8 +24,8 @@
         "sourceSectionIds": [
           "randomization"
         ],
-        "translation": "Katılırsanız, bir bilgisayar sizi şans eseri araştırma tableti grubuna veya plasebo grubuna atayacaktır. Her iki gruba atanma şansınız %50'dir. Ne siz ne de araştırmacı grubunuzu seçer. Etken madde içermeyen bir plasebo alabilirsiniz. Araştırma tabletinin size yardımcı olacağı garanti edilmez.",
-        "backTranslation": "If you participate, a computer will randomly assign you to the research tablet group or the placebo group. Your chance of being assigned to either group is 50%. Neither you nor the researcher chooses your group. You may receive a placebo containing no active ingredient. It is not guaranteed that the research tablet will help you.",
+        "translation": "Çalışmaya katılırsanız, bir bilgisayar sizi şans eseri araştırma hapı grubuna veya plasebo grubuna atayacaktır. Her iki gruba atanma şansınız 50% kadardır. Grubunuzu ne siz ne de araştırmacı seçer. Aktif çalışma ilacı içermeyen bir plasebo alabilirsiniz. Araştırma hapının size yardımcı olacağı garanti edilmez.",
+        "backTranslation": "If you participate in the study, a computer will randomly assign you to the research pill group or the placebo group. Your chance of being assigned to either group is about 50%. Neither you nor the researcher chooses your group. You may receive a placebo containing no active study drug. It is not guaranteed that the research pill will help you.",
         "flags": [
           {
             "code": "REVIEW_AID",
@@ -34,7 +34,7 @@
           }
         ],
         "visual": "RANDOMIZATION",
-        "elapsedMs": 1894,
+        "elapsedMs": 2445,
         "canRelease": true
       }
     },
@@ -42,22 +42,22 @@
       "route": "/api/visits",
       "status": 200,
       "request": {
-        "requestId": "cbc7022d-6cb1-4978-ae7e-2ea8cec412aa",
+        "requestId": "e12eb839-b02f-4181-b40a-2aa24c7e872e",
         "locale": "tr-TR",
         "engine": "live",
         "speaker": "participant",
         "text": "Bu kısmı açıklayabilir misiniz?"
       },
       "result": {
-        "requestId": "cbc7022d-6cb1-4978-ae7e-2ea8cec412aa",
+        "requestId": "e12eb839-b02f-4181-b40a-2aa24c7e872e",
         "locale": "tr-TR",
         "engine": "live",
         "speaker": "participant",
         "sourceText": "Bu kısmı açıklayabilir misiniz?",
         "sourceLanguage": "tr-TR",
         "targetLanguage": "en-US",
-        "translation": "Can you explain this part?",
-        "reverseTranslation": "Bu kısmı açıklayabilir misin?",
+        "translation": "Could you explain this part?",
+        "reverseTranslation": "Bu kısmı açıklayabilir misiniz?",
         "flags": [
           {
             "code": "REVIEW_AID",
@@ -65,7 +65,7 @@
             "message": "Reverse translation and quantity checks are review aids, not proof of accuracy. Review names, units, negations, questions, and meaning before sharing; native-language checks are limited to written digits."
           }
         ],
-        "elapsedMs": 1303,
+        "elapsedMs": 1302,
         "canRelease": true
       }
     },
@@ -73,22 +73,22 @@
       "route": "/api/visits",
       "status": 200,
       "request": {
-        "requestId": "c7483cee-638a-4672-9b29-6fc12feed16b",
+        "requestId": "cc2fa1f2-4013-4fe1-aa03-2bef4ecb11d1",
         "locale": "tr-TR",
         "engine": "live",
         "speaker": "clinician",
         "text": "A computer assigns the group by chance. Neither you nor the researcher chooses the group. You have a 50% chance of either group."
       },
       "result": {
-        "requestId": "c7483cee-638a-4672-9b29-6fc12feed16b",
+        "requestId": "cc2fa1f2-4013-4fe1-aa03-2bef4ecb11d1",
         "locale": "tr-TR",
         "engine": "live",
         "speaker": "clinician",
         "sourceText": "A computer assigns the group by chance. Neither you nor the researcher chooses the group. You have a 50% chance of either group.",
         "sourceLanguage": "en-US",
         "targetLanguage": "tr-TR",
-        "translation": "Bir bilgisayar grubu şans eseri atar. Ne siz ne de araştırmacı grubu seçer. Her iki grup için de %50 şansınız var.",
-        "reverseTranslation": "A computer group assigns by chance. Neither you nor the researcher chooses the group. You have a 50% chance for both groups.",
+        "translation": "Bir bilgisayar grubu şans eseri belirler. Ne siz ne de araştırmacı grubu seçer. Her iki grup için de yüzde 50 şansınız vardır.",
+        "reverseTranslation": "A computer group determines it by chance. Neither you nor the researcher selects the group. You have a 50 percent chance for both groups.",
         "flags": [
           {
             "code": "REVIEW_AID",
@@ -96,7 +96,7 @@
             "message": "Reverse translation and quantity checks are review aids, not proof of accuracy. Review names, units, negations, questions, and meaning before sharing; native-language checks are limited to written digits."
           }
         ],
-        "elapsedMs": 1597,
+        "elapsedMs": 1554,
         "canRelease": true
       }
     },
@@ -104,7 +104,7 @@
       "route": "/api/documents",
       "status": 200,
       "request": {
-        "requestId": "b4c64d51-4f6e-40ba-8bd4-919b51b4d68d",
+        "requestId": "3ccb3972-5c14-4cc8-ab43-e362b8f9be94",
         "locale": "tr-TR",
         "engine": "sample",
         "source": {
@@ -113,7 +113,7 @@
         }
       },
       "result": {
-        "requestId": "b4c64d51-4f6e-40ba-8bd4-919b51b4d68d",
+        "requestId": "3ccb3972-5c14-4cc8-ab43-e362b8f9be94",
         "locale": "tr-TR",
         "engine": "sample",
         "source": {
