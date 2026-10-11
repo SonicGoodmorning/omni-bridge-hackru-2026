@@ -8,7 +8,7 @@ import { reviewDocument } from "../src/lib/documents/review";
 import { sampleDocument } from "../src/lib/documents/sample";
 import { resolveDocumentSource, VISIT_DOCUMENT } from "../src/lib/documents/source";
 import { documentRequestSchema, documentResultSchema, matchesDocumentRequest, type DocumentRequest } from "../src/lib/documents/types";
-import { LOCALES } from "../src/lib/types";
+import { SAMPLE_LOCALES } from "../src/lib/types";
 
 const request: DocumentRequest = { requestId: "document-1", locale: "tr-TR", engine: "live", source: { kind: "fixture", id: "visit-summary" } };
 const source = resolveDocumentSource(request.source);
@@ -43,7 +43,7 @@ test("document requests strictly validate fixture, acknowledgment, character bou
     { ...request, source: { kind: "paste", text: " ", acknowledged: true } },
     { ...request, source: { kind: "paste", text: "x".repeat(4_001), acknowledged: true } },
     { ...request, source: { kind: "paste", text: "test", acknowledged: true, patientId: "extra" } },
-    { ...request, apiKey: "unexpected" }, { ...request, locale: "en-US" }, { ...request, requestId: "bad id" },
+    { ...request, apiKey: "unexpected" }, { ...request, locale: "xx-XX" }, { ...request, requestId: "bad id" },
   ]) {
     const fake = fakeTransport([]); await expectCode(() => executeDocument(invalid, { transport: fake.transport }), "INVALID_REQUEST", 400); assert.equal(fake.calls.length, 0);
   }
@@ -73,9 +73,9 @@ test("pasted source revisions detect edits and stable paragraph IDs retain all t
   for (let i = 0; i < 25; i += 1) assert.ok(many.paragraphs.some((p) => p.text.includes(`Paragraph ${i}.`)));
 });
 
-test("the visit fixture works in all five sample languages without transport, clearly labeled as prepared", async () => {
+test("the visit fixture works in all six sample languages without transport, clearly labeled as prepared", async () => {
   const fake = fakeTransport([]);
-  for (const locale of LOCALES) {
+  for (const locale of SAMPLE_LOCALES) {
     const result = await executeDocument({ ...request, locale, engine: "sample" }, { transport: fake.transport });
     assert.equal(result.blocks.length, 3); assert.equal(result.engine, "sample"); assert.equal(result.canRelease, true);
     assert.ok(result.flags.some((flag) => flag.code === "SAMPLE_FIXTURE"));

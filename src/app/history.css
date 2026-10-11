@@ -1,0 +1,94 @@
+/* Shared history view: route and modal use the same controls, list and feedback. */
+.visit-history-page { max-width: 1240px; }
+.saved-conversations {
+  position: fixed;
+  inset: 24px;
+  width: calc(100% - 48px);
+  max-width: 880px;
+  max-height: calc(100dvh - 48px);
+  margin: auto;
+  padding: 32px;
+  overflow: auto;
+  scrollbar-gutter: stable;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--background);
+  color: var(--ink);
+}
+.saved-conversations::backdrop { background: var(--overlay); }
+.saved-conversations header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.saved-conversations h2 { margin: 8px 0 0; color: var(--ink); font: 600 36px/1.1 var(--serif); }
+.saved-conversations .eyebrow { color: var(--muted); font-size: 10px; letter-spacing: 1px; }
+.saved-conversations button { min-height: 44px; font-size: 13px; }
+.saved-conversations :focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+.saved-description { max-width: 84ch; margin: 24px 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+.visit-current-summary { display: flex; align-items: flex-start; gap: 24px; margin: 24px 0; padding: 24px; border: 1px solid var(--line); border-left: 3px solid var(--teal); border-radius: var(--radius-panel); background: var(--paper); }
+.visit-current-summary > div { flex: 1; min-width: 0; }
+.visit-current-summary strong { display: block; margin-top: 8px; font: 600 24px/1.3 var(--serif); overflow-wrap: anywhere; }
+.visit-current-summary p:not(.eyebrow) { margin: 8px 0; font-size: 13px; line-height: 1.8; }
+.visit-current-summary small { display: block; max-width: 84ch; color: var(--muted); font-size: 12px; line-height: 1.8; }
+.visit-current-summary button { flex-shrink: 0; max-width: 192px; text-align: start; line-height: 1.7; }
+.visit-history-filters { display: flex; align-items: flex-end; gap: 24px; margin: 32px 0 24px; }
+.visit-history-filters label { flex: 1; min-width: 0; color: var(--ink); font-size: 12px; line-height: 1.8; }
+.visit-search-field { flex: 2; min-width: 0; }
+.visit-search-field > label { display: block; }
+.visit-history-filters input,
+.visit-history-filters select { display: block; width: 100%; min-height: 48px; margin-top: 8px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--paper); color: var(--ink); font: 14px var(--sans); }
+.visit-history-filters input:hover,
+.visit-history-filters select:hover { border-color: var(--muted); }
+.visit-history-filters input::placeholder { color: var(--muted); opacity: 1; }
+.visit-history-filters > span { padding-bottom: 12px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+.visit-history-search { position: relative; display: block; margin-top: 8px; }
+.visit-history-search input { margin-top: 0; padding-inline-end: 48px; }
+.visit-history-search input::-webkit-search-cancel-button { display: none; }
+.visit-search-clear { position: absolute; inset-inline-end: 4px; top: 4px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; min-height: 40px !important; padding: 0; border-radius: var(--radius-control); background: transparent; color: var(--muted); }
+.visit-search-clear:hover { background: var(--teal-pale); color: var(--teal); }
+.saved-entry { padding: 24px 0; border-top: 1px solid var(--line); }
+.saved-entry-heading { display: flex; align-items: baseline; gap: 16px; }
+.saved-entry h3 { color: var(--ink); font: 600 26px/1.3 var(--serif); overflow-wrap: anywhere; }
+.saved-current { display: inline-flex; align-items: center; min-height: 24px; padding: 4px 8px; border-radius: var(--radius-control); background: var(--teal-pale); color: var(--teal); font-size: 11px; line-height: 1.4; white-space: nowrap; }
+.visit-patient-name { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; margin-top: 12px; color: var(--ink); font-size: 14px; }
+.saved-meta { margin-top: 8px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.saved-preview { max-width: 88ch; margin: 16px 0 8px; color: var(--ink); font-size: 14px; line-height: 1.8; overflow-wrap: anywhere; }
+.saved-date { color: var(--muted); font-size: 11px; line-height: 1.7; font-variant-numeric: tabular-nums; }
+.visit-snapshot { margin: 16px 0; padding: 0 16px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--paper); color: var(--muted); font-size: 13px; line-height: 1.8; }
+.visit-snapshot summary { min-height: 44px; padding: 12px 0; cursor: pointer; }
+.visit-snapshot summary:hover { color: var(--teal); }
+.visit-snapshot dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding: 16px 0; }
+.visit-snapshot dt { color: var(--muted); font-size: 10px; letter-spacing: .6px; text-transform: uppercase; }
+.visit-snapshot dd { margin: 4px 0 0; color: var(--ink); overflow-wrap: anywhere; }
+.visit-snapshot p { margin-bottom: 16px; font-size: 12px; }
+.saved-entry-actions { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-top: 16px; }
+.saved-entry-actions .text-button:first-child { font-weight: 700; }
+.saved-danger { color: var(--danger) !important; }
+.saved-danger:hover { background: var(--danger-bg); }
+.saved-empty { padding: 32px 0 40px; border-top: 1px solid var(--line); }
+.saved-empty > svg { display: block; margin-bottom: 16px; color: var(--muted); }
+.saved-empty h3 { color: var(--ink); font: 600 28px/1.3 var(--serif); }
+.saved-empty p { margin-top: 8px; color: var(--muted); font-size: 13px; line-height: 1.8; }
+.visit-history-page footer,
+.saved-conversations footer { padding-top: 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 1.8; }
+.saved-local-note { margin-top: 4px; font-size: 11px; }
+.saved-footer-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; margin-top: 16px; }
+.saved-rename { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 16px; margin-top: 16px; }
+.saved-rename label { flex: 1; min-width: 200px; font-size: 12px; }
+.saved-rename input { display: block; width: 100%; min-height: 48px; margin-top: 8px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--paper); color: var(--ink); font: 14px var(--sans); }
+.saved-confirm { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 24px; margin-top: 16px; padding: 16px; border: 1px solid var(--danger); border-radius: var(--radius-control); background: var(--danger-bg); }
+.saved-confirm p { width: 100%; color: var(--ink); font-size: 13px; line-height: 1.8; }
+@media (max-width: 600px) {
+  .saved-conversations { inset: 8px; width: calc(100% - 16px); max-height: calc(100dvh - 16px); padding: 24px 16px; }
+  .saved-conversations h2 { font-size: 32px; }
+  .visit-history-filters { flex-wrap: wrap; gap: 16px; margin-top: 24px; }
+  .visit-search-field { flex-basis: 100%; }
+  .visit-history-filters > span { padding-bottom: 12px; }
+  .visit-current-summary { flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px; }
+  .visit-current-summary button { max-width: none; }
+  .saved-entry-heading { align-items: flex-start; flex-wrap: wrap; gap: 8px; }
+  .saved-entry h3 { font-size: 24px; }
+  .visit-patient-name { gap: 8px 16px; }
+  .visit-snapshot dl { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .saved-rename label { flex: auto; width: 100%; }
+}
+@media print {
+  .visit-history-filters, .saved-entry-actions, .saved-footer-actions, .visit-current-summary button { display: none !important; }
+}

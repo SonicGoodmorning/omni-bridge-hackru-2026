@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { patientContextSchema, type PatientContext } from "../patient/profile";
 import { LOCALES, type Engine, type Locale, type ReviewFlag } from "../types";
 
 export type VisitSpeaker = "clinician" | "participant";
@@ -9,6 +10,7 @@ export interface VisitRequest {
   engine: Engine;
   speaker: VisitSpeaker;
   text: string;
+  patientContext?: PatientContext;
 }
 
 export interface VisitResult {
@@ -32,6 +34,7 @@ export const visitRequestSchema = z.object({
   engine: z.enum(["live", "sample"]),
   speaker: z.enum(["clinician", "participant"]),
   text: z.string().trim().min(1).max(4_000),
+  patientContext: patientContextSchema.optional(),
 }).strict();
 
 export const visitResultSchema = z.object({

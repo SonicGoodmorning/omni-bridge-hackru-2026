@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { patientContextSchema } from "../patient/profile";
 import { LOCALES } from "../types";
 import { SECTIONS } from "../study";
 
@@ -9,6 +10,7 @@ export const bridgeRequestSchema = z.object({
   mode: z.enum(["consent", "conversation"]),
   locale: z.enum(LOCALES),
   engine: z.enum(["live", "sample"]),
+  patientContext: patientContextSchema.optional(),
   sectionId: z.string().optional(),
   text: z.string().trim().max(4_000).optional(),
 }).strict().superRefine((value, context) => {

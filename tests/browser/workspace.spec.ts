@@ -4,7 +4,7 @@ import type { DocumentRequest, DocumentResult } from "../../src/lib/documents/ty
 
 const reviewLabel = "I have reviewed the source, explanation, and English reverse rendering.";
 const acknowledgeLabel = "I confirm this text is public or fictional and contains no private personal information.";
-const locales = ["tr-TR", "es-419", "pt-BR", "hi-IN", "zh-CN"];
+const locales = ["en-US", "tr-TR", "es-419", "pt-BR", "hi-IN", "zh-CN"];
 
 async function shareDocument(page: Page) {
   await page.getByRole("checkbox", { name: reviewLabel, exact: true }).check();
@@ -31,6 +31,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/documents");
   await expect(page.locator(".shared-app")).not.toHaveAttribute("inert", "");
   await page.getByLabel("Explanation engine").selectOption("sample");
+  await page.getByLabel("Participant preferred language").selectOption("tr-TR");
 });
 
 test("consent draft stays private until reviewed; language changes clear approval and participant text", async ({ page }) => {
@@ -52,7 +53,7 @@ test("consent draft stays private until reviewed; language changes clear approva
   await expect(page.getByRole("checkbox", { name: reviewLabel, exact: true })).toHaveCount(0);
 });
 
-test("trial procedures and visit summary preserve numerical facts in all five sample languages", async ({ page }) => {
+test("trial procedures and visit summary preserve numerical facts in all six sample languages", async ({ page }) => {
   await page.getByRole("button", { name: /03 Visits & procedures/ }).click();
   for (const locale of locales) {
     await page.getByLabel("Participant preferred language").selectOption(locale);
@@ -280,18 +281,17 @@ test("glossary terms have word boundaries and keyboard close returns trigger foc
   await expect(page.locator("#doc-glossary")).not.toContainText("10 mg");
 });
 
-test("mobile tabs keep the gate, restore source scroll and avoid horizontal overflow", async ({ page }) => {
+test("mobile tabs keep the gate and use document scrolling without horizontal overflow", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole("region", { name: "Original document", exact: true })).toBeVisible();
   await expect(page.getByRole("region", { name: "Coordinator review", exact: true })).not.toBeVisible();
   await page.getByLabel("Document source", { exact: true }).selectOption("visit-summary");
-  await page.locator("#doc-pane-source").evaluate((pane) => { pane.scrollTop = 200; });
-  await expect.poll(() => page.locator("#doc-pane-source").evaluate((pane) => pane.scrollTop)).toBe(200);
-  const scroll = await page.locator("#doc-pane-source").evaluate((pane) => pane.scrollTop);
-  expect(scroll).toBeGreaterThan(0);
+  // The responsive layout deliberately uses page scrolling, not a nested pane.
+  await page.getByRole("button", { name: "Prepare explanation", exact: true }).scrollIntoViewIfNeeded();
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
   await page.getByRole("tab", { name: "Participant", exact: true }).click();
   await page.getByRole("tab", { name: "Source", exact: true }).click();
-  await expect.poll(() => page.locator("#doc-pane-source").evaluate((pane) => pane.scrollTop)).toBe(scroll);
+  await expect(page.getByRole("region", { name: "Original document", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Prepare explanation", exact: true }).click();
   await expect(page.getByRole("region", { name: "Coordinator review", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Show to participant", exact: true })).toBeDisabled();

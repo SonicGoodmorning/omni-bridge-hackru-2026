@@ -1,16 +1,19 @@
 "use client";
 
+import type { PatientContext } from "@/lib/patient/profile";
+
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { bridgeReducer, initialBridgeState } from "@/lib/bridge-state";
 import type { BridgeMode, BridgeRequest, BridgeResult, Engine, Locale } from "@/lib/types";
 import { bridgeResultSchema } from "@/lib/bridge/schema";
 import { findSection, STUDY } from "@/lib/study";
 
-export function useBridge(liveAvailable: boolean) {
+export function useBridge(liveAvailable: boolean, context?: PatientContext) {
   const [state, dispatch] = useReducer(bridgeReducer, liveAvailable, initialBridgeState);
   const stateRef = useRef(state);
   stateRef.current = state;
   const controller = useRef<AbortController | null>(null);
+  const contextRef = useRef(context); contextRef.current = context;
 
   useEffect(() => () => controller.current?.abort(), []);
 
@@ -27,6 +30,7 @@ export function useBridge(liveAvailable: boolean) {
     controller.current = abort;
     const requestId = crypto.randomUUID();
     const payload: BridgeRequest = {
+      patientContext: contextRef.current,
       requestId, mode: current.mode, locale: current.locale, engine: current.engine,
       ...(current.mode === "consent" ? { sectionId: current.sectionId } : { text: current.text.trim() }),
     };

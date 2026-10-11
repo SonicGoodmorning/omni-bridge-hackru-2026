@@ -1,6 +1,6 @@
 # One session from source to discussion
 
-Omni-Bridge connects a document explanation with the participant's next question. Begin the demonstration with the fictional CLEAR trial. A fictional outpatient follow-up note exercises the same review process. This is an education prototype for synthetic material, not an EHR, consent record, or application for actual patient care.
+SayAhh connects a document explanation with the participant's next question. Begin the demonstration with the fictional CLEAR trial. A fictional outpatient follow-up note exercises the same review process. This is an education prototype for synthetic material, not an EHR, consent record, or application for actual patient care.
 
 ## Session flow
 

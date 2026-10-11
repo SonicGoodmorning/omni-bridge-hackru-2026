@@ -5,7 +5,7 @@ import { BridgeServiceError } from "../src/lib/bridge/errors";
 import { reviewFacts } from "../src/lib/bridge/review";
 import { bridgeRequestSchema, bridgeResultSchema } from "../src/lib/bridge/schema";
 import { SAMPLE_CONVERSATION, SECTIONS } from "../src/lib/study";
-import { LOCALES, type BridgeRequest } from "../src/lib/types";
+import { SAMPLE_LOCALES, type BridgeRequest } from "../src/lib/types";
 
 const consent: BridgeRequest = { requestId: "test-1", mode: "consent", locale: "tr-TR", engine: "live", sectionId: "randomization" };
 
@@ -43,7 +43,7 @@ async function expectCode(action: () => Promise<unknown>, code: string, status?:
 test("request validation rejects unknown language, extra fields, wrong mode fields and oversized speech", () => {
   assert.equal(bridgeRequestSchema.safeParse(consent).success, true);
   for (const invalid of [
-    { ...consent, locale: "en-US" }, { ...consent, sectionId: "made-up" }, { ...consent, text: "replace source" },
+    { ...consent, locale: "xx-XX" }, { ...consent, sectionId: "made-up" }, { ...consent, text: "replace source" },
     { ...consent, apiKey: "should-not-be-accepted" }, { ...consent, requestId: "" },
     { ...consent, mode: "conversation", sectionId: undefined, text: " " },
     { ...consent, mode: "conversation", sectionId: undefined, text: "x".repeat(4_001) },
@@ -56,9 +56,9 @@ test("invalid requests fail before a model call", async () => {
   assert.equal(fake.calls.length, 0);
 });
 
-test("every section has an explicit labeled sample in every supported language", async () => {
+test("every section has an explicit labeled sample in every prepared-sample language", async () => {
   const unique = new Set<string>();
-  for (const locale of LOCALES) {
+  for (const locale of SAMPLE_LOCALES) {
     for (const section of SECTIONS) {
       const result = await executeBridge({ ...consent, engine: "sample", locale, sectionId: section.id });
       assert.equal(result.engine, "sample");
@@ -72,11 +72,11 @@ test("every section has an explicit labeled sample in every supported language",
       unique.add(result.translation);
     }
   }
-  assert.equal(unique.size, 30);
+  assert.equal(unique.size, SAMPLE_LOCALES.length * SECTIONS.length);
 });
 
 test("sample speech supports only the fixed conversation, allowing punctuation and case differences", async () => {
-  for (const locale of LOCALES) {
+  for (const locale of SAMPLE_LOCALES) {
     const result = await executeBridge({ requestId: "speech-sample", mode: "conversation", engine: "sample", locale, text: SAMPLE_CONVERSATION.toUpperCase().replaceAll(".", "!") });
     assert.equal(result.engine, "sample");
     assert.deepEqual(result.sourceSectionIds, ["randomization"]);

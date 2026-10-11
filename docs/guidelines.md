@@ -38,9 +38,11 @@ The [MLH HackRU prize page](https://www.mlh.com/events/hackru-21/prizes) lists B
 
 ## Unverified items
 
-- The reviewed public overview, rules, and resources do not state an AI-assisted-development policy. Silence does not establish permission or prohibition. Confirm the policy and any disclosure requirement.
+- MLH’s current [standard rules](https://raw.githubusercontent.com/MLH/mlh-policies/main/standard-hackathon-rules.md) allow AI assistance with transparent disclosure. Events may adopt their own rules; confirm HackRU-specific policy. The two-minute video rule in that document is for MLH-hosted fully digital events and is not a demonstrated requirement for this in-person event.
 - Authenticated form questions, upload constraints, cross-prize eligibility, and newer Discord announcements remain unchecked.
 - Eligibility of any work from before the stated build window requires an organizer determination. These documents do not certify it.
+
+The user confirmed all project work was created during the event. Earliest Git commit is October 10 at 2:17 p.m. Eastern; this is consistent with that statement, not independent proof. No-cross-submission confirmation remains pending.
 
 The attached organizer-email PDF visibly announces Gemini and the UI/UX and clinical-trials superlatives, but its screenshot crops substantial email content. The MLH email is also cropped. Neither settles a rule absent from the public pages.
 

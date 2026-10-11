@@ -1,17 +1,22 @@
 import { expect, test, type Page } from "@playwright/test";
 import { SAMPLE_VISIT } from "../../src/lib/visits/sample";
-import type { Locale } from "../../src/lib/types";
+import type { Locale, SampleLocale } from "../../src/lib/types";
 
 const clinicianTurn = SAMPLE_VISIT.find((turn) => turn.speaker === "clinician")!;
 const participantTurn = SAMPLE_VISIT.find((turn) => turn.speaker === "participant")!;
-const locales: Locale[] = ["tr-TR", "es-419", "pt-BR", "hi-IN", "zh-CN"];
+const locales: Exclude<SampleLocale, "en-US">[] = ["tr-TR", "es-419", "pt-BR", "hi-IN", "zh-CN"];
 const reviewLabel = "I have reviewed the original, translation, and reverse rendering.";
 
 async function openVisits(page: Page) {
   await page.goto("/");
   await expect(page.locator(".visits-shell")).not.toHaveAttribute("inert", "");
-  await page.getByLabel("Explanation engine").selectOption("sample");
-  await expect(page.getByLabel("Explanation engine")).toHaveValue("sample");
+  const compact = !(await page.getByLabel("Explanation engine").isVisible());
+  if (compact) await page.getByRole("button", { name: "Menu", exact: true }).click();
+  const engine = page.getByLabel(compact ? "Menu explanation engine" : "Explanation engine", { exact: true });
+  await engine.selectOption("sample");
+  await page.getByLabel("Participant preferred language").selectOption("tr-TR");
+  await expect(engine).toHaveValue("sample");
+  if (compact) await page.getByRole("button", { name: "Menu", exact: true }).click();
   await page.getByRole("button", { name: "Try a sample", exact: true }).click();
 }
 

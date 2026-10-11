@@ -8,14 +8,14 @@ Preflight the deployed URL, Vercel access, network, and Gemini quota. Use Turkis
 
 | Time | Screen and action | Suggested narration |
 | --- | --- | --- |
-| 0:00–0:15 | Title, then Document guide with CLEAR and Turkish selected | “Omni-Bridge connects understanding a trial with asking the next question. This is a fictional education demonstration.” |
+| 0:00–0:15 | Title, then Document guide with CLEAR and Turkish selected | “SayAhh connects understanding a trial with asking the next question. This is a fictional education demonstration.” |
 | 0:15–0:40 | Select randomization. Prepare a labelled sample if conserving quota. Show source, translation, English rendering, and flags. | “The source says there is a 50% chance of either group, and neither person chooses. The coordinator sees a draft first. This prepared example is labelled Sample mode.” |
 | 0:40–0:55 | Review and share. Show the participant explanation and source paragraph. | “Sharing releases this exact draft. The source link returns us to the wording we are discussing.” |
 | 0:55–1:15 | Attach a Turkish question to the source paragraph and open Conversation. Select Gemini live visibly. | “The participant can ask in their own language. The editable question and paragraph context remain while we switch into live translation.” |
 | 1:15–1:45 | Translate the participant question with Gemini live visibly selected. Show the actual result or error. Review/share if releasable. | “This segment makes a fresh live request. Gemini translates the participant's own words into English, then separately renders that translation back. It does not answer the question.” |
 | 1:45–2:10 | Human coordinator types or speaks a short reply. Correct recognized text if needed, translate, review, and share. | “The human coordinator supplies the reply. English travels back to Turkish through the same review step. Typing remains available.” |
 | 2:10–2:30 | Return to Document guide. Show the fictional visit summary and a source-linked explanation with its engine label. | “The same session can explain this fictional follow-up note. Each paragraph stays attached to its source. The explanation describes the documented plan without creating a new one.” |
-| 2:30–2:45 | Enlarge text in Reading preferences. Briefly show all language choices. | “Reading preferences change the display without rewriting reviewed text. The prototype supports five language choices.” |
+| 2:30–2:45 | Enlarge text in Reading preferences. Briefly show all language choices. | “Reading preferences change the display without rewriting reviewed text. The prototype supports 16 live language choices and six prepared sample languages.” |
 | 2:45–3:00 | Closing slide, repository, limitations | “We built a connected, inspectable workflow. Translation quality, real speech behavior, and clinical use need further review. Our repository discloses AI assistance, observed tests, and limitations.” |
 
 Switching engines clears translated/shared work and requires fresh review, while retaining the editable speaker question and its paragraph context. Show that change honestly. Starting in live mode is also possible when quota allows.
@@ -54,9 +54,9 @@ The outpatient note has a prepared fixture. Arbitrary pasted synthetic text need
 
 **Why show sources?** Reviewers can inspect the exact paragraph behind an explanation and attach a question. A source link alone does not prove faithful translation.
 
-**What has been evaluated?** Report current recorded checks and actual live observations only. Browser speech mocks do not evaluate real recognition accuracy. All five languages need qualified review. No patient outcome or clinical validation has been established.
+**What has been evaluated?** Report current recorded checks and actual live observations only. Browser speech mocks do not evaluate real recognition accuracy. All supported languages need qualified review. No patient outcome or clinical validation has been established.
 
-**What is stored?** Session work stays in page memory, with no accounts or database. Live text goes to Gemini. Browser speech recognition may use a remote service. Do not enter patient information.
+**What is stored?** Drafts and document explanations stay in page memory. Shared turns save automatically in unencrypted browser storage; patient snapshots, plans and numbers have optional local saving. There are no accounts or server database. Live text goes to Gemini. Browser speech recognition may use a remote service. Do not enter patient information.
 
 ## Submission materials
 

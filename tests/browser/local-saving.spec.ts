@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { CONVERSATION_STORAGE_KEY } from "../../src/lib/local-conversation";
+import { HISTORY_STORAGE_KEY } from "../../src/lib/local-conversation";
 import { SAMPLE_VISIT } from "../../src/lib/visits/sample";
 async function prepared(page: import("@playwright/test").Page) {
   await page.goto("/");
@@ -20,8 +20,8 @@ test("shared history survives refresh and a new tab, while drafts and review sta
   await page.getByLabel("Clinician message", { exact: true }).fill(SAMPLE_VISIT[0].english);
   await page.getByRole("button", { name: "Translate for participant", exact: true }).click();
   await page.getByRole("checkbox", { name: "I have reviewed the original, translation, and reverse rendering.", exact: true }).check();
-  const stored = await page.evaluate((key) => localStorage.getItem(key), CONVERSATION_STORAGE_KEY);
-  expect(JSON.parse(stored!).turns).toHaveLength(1);
+  const stored = await page.evaluate((key) => localStorage.getItem(key), HISTORY_STORAGE_KEY);
+  expect(JSON.parse(stored!).conversations[0].conversation.turns).toHaveLength(1);
   expect(stored).not.toContain("reviewConfirmed"); expect(stored).not.toContain('"drafts"');
   await page.reload();
   await expect(page.getByRole("region", { name: "Shared conversation", exact: true }).locator("article")).toHaveCount(1);
@@ -33,20 +33,29 @@ test("shared history survives refresh and a new tab, while drafts and review sta
   await expect(other.getByRole("region", { name: "Shared conversation", exact: true }).locator("article")).toHaveCount(1);
   await other.close();
 });
-test("Delete saved conversation and New session remove persisted turns", async ({ page }) => {
-  for (const label of ["Delete saved conversation", "New session"]) {
-    await prepared(page);
-    await page.getByRole("button", { name: "Menu", exact: true }).click(); await page.getByRole("button", { name: label, exact: true }).click();
-    await expect.poll(() => page.evaluate((key) => localStorage.getItem(key), CONVERSATION_STORAGE_KEY)).toBeNull();
-    await page.reload(); await expect(page.getByRole("region", { name: "Shared conversation", exact: true }).locator("article")).toHaveCount(0);
-  }
+test("New session keeps earlier visits; explicit deletion removes saved visits", async ({ page }) => {
+  await prepared(page);
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await page.getByRole("button", { name: "New session", exact: true }).click();
+  await page.reload();
+  await expect(page.getByRole("region", { name: "Shared conversation", exact: true }).locator("article")).toHaveCount(0);
+  const saved = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), HISTORY_STORAGE_KEY);
+  expect(saved.activeId).toBeNull(); expect(saved.conversations).toHaveLength(1);
+  await page.goto("/history");
+  await expect(page.locator(".saved-entry")).toHaveCount(1);
+  await page.getByRole("button", { name: "Delete all saved visits", exact: true }).click();
+  await page.getByRole("button", { name: "Delete all permanently", exact: true }).click();
+  await expect(page.locator(".saved-entry")).toHaveCount(0);
+  await page.reload(); await expect(page.locator(".saved-entry")).toHaveCount(0);
 });
 test("invalid stored data and unavailable browser storage leave a usable app", async ({ page }) => {
-  await page.addInitScript((key) => localStorage.setItem(key, '{"version":999}'), CONVERSATION_STORAGE_KEY);
+  await page.addInitScript((key) => localStorage.setItem(key, '{"version":999}'), HISTORY_STORAGE_KEY);
   await page.goto("/"); await expect(page.getByRole("status")).toContainText("could not be loaded");
   await page.getByLabel("Clinician message", { exact: true }).fill("Still editable");
-  await page.getByRole("button", { name: "Menu", exact: true }).click(); await page.getByRole("button", { name: "Delete saved conversation", exact: true }).click();
-  expect(await page.evaluate((key) => localStorage.getItem(key), CONVERSATION_STORAGE_KEY)).toBeNull();
+  await page.goto("/history");
+  await page.getByRole("button", { name: "Delete all saved visits", exact: true }).click();
+  await page.getByRole("button", { name: "Delete all permanently", exact: true }).click();
+  expect(await page.evaluate((key) => localStorage.getItem(key), HISTORY_STORAGE_KEY)).toBeNull();
 });
 test("blocked storage reports failure without losing the current conversation", async ({ page }) => {
   await page.addInitScript(() => { Storage.prototype.setItem = () => { throw new DOMException("blocked", "QuotaExceededError"); }; });

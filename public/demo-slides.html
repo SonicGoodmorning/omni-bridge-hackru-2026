@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>Omni-Bridge · HackRU Fall 2026</title>
+  <title>SayAhh · HackRU Fall 2026</title>
   <style>
     :root { --paper: #f6f4ed; --ink: #17342f; --muted: #596b64; --accent: #157768; --line: #bccbc2; --soft: #dfebe1; }
     * { box-sizing: border-box; }
@@ -86,14 +86,14 @@
   </style>
 </head>
 <body>
-  <main class="deck" aria-label="Omni-Bridge presentation">
+  <main class="deck" aria-label="SayAhh presentation">
 
-    <section class="slide dark is-active" aria-label="Slide 1 of 11: Omni-Bridge">
+    <section class="slide dark is-active" aria-label="Slide 1 of 11: SayAhh">
       <p class="eyebrow">HackRU Fall 2026</p>
       <div class="spacer"></div>
-      <h1>Omni-Bridge</h1>
+      <h1>SayAhh</h1>
       <p class="lede">Understand the trial<br>in your language</p>
-      <p class="quiet" style="margin-top:25px">The document and the next conversation in one session</p>
+      <p class="quiet" style="margin-top:25px">Clinical-trial explanations and coordinator conversations</p>
       <div class="spacer"></div>
       <div class="footer"><span>Source-linked explanations and two-way conversation</span><span>Fictional education prototype</span></div>
       <aside class="notes">Begin with the fictional CLEAR trial and the participant's question. State whether the current segment uses prepared samples or live Gemini. The outpatient-note example extends the same workflow and does not establish a real clinical integration. This is an AI-assisted prototype, with provenance in docs/guidelines.md.</aside>
@@ -116,8 +116,8 @@
         <div><h3>Conversation</h3><p class="body">A participant asks in their language. A human coordinator replies in English.</p></div>
       </div>
       <p class="quiet" style="margin-top:30px">The source context and language travel with the question.</p>
-      <div class="footer"><span>Shared session in memory</span><span>03</span></div>
-      <aside class="notes">Show navigation within one session. The question carries its paragraph context into the two-way conversation. The app translates the humans' own words and does not generate the clinician's answer. Session state is temporary browser memory, not a clinical record.</aside>
+      <div class="footer"><span>Shared turns saved in this browser</span><span>03</span></div>
+      <aside class="notes">Show navigation within one session. The question carries its paragraph context into the two-way conversation. The app translates the humans' own words and does not generate the clinician's answer. Drafts remain temporary. Shared turns save in unencrypted browser storage; optional patient snapshots and plans are also local. This is not a clinical record.</aside>
     </section>
 
     <section class="slide" aria-label="Slide 4 of 11: Fictional source documents">
@@ -158,15 +158,16 @@
       <p class="eyebrow">Language and reading preferences</p>
       <h2>A readable participant view</h2>
       <div class="languages">
+        <div class="language"><strong>English</strong><span>Plain language</span></div>
         <div class="language"><strong lang="tr">Türkçe</strong><span>Turkish</span></div>
         <div class="language"><strong lang="es">Español</strong><span>Latin America</span></div>
         <div class="language"><strong lang="pt-BR">Português</strong><span>Brazil</span></div>
         <div class="language"><strong lang="hi">हिन्दी</strong><span>Hindi</span></div>
         <div class="language"><strong lang="zh-CN">简体中文</strong><span>Mandarin</span></div>
       </div>
-      <p class="quiet" style="margin-top:24px">Larger text changes the display and preserves reviewed wording.</p>
-      <div class="footer"><span>All five languages need qualified review</span><span>07</span></div>
-      <aside class="notes">The five locales are tr-TR, es-419, pt-BR, hi-IN, and zh-CN. Show Reading preferences without regenerating or rewriting the current explanation. Prototype coverage is not certified translation coverage. No completed qualified language review is claimed.</aside>
+      <p class="quiet" style="margin-top:24px">16 live languages · Six prepared sample languages · Larger reading text</p>
+      <div class="footer"><span>Language availability is not validated translation quality</span><span>07</span></div>
+      <aside class="notes">Prepared samples cover en-US, tr-TR, es-419, pt-BR, hi-IN, and zh-CN. Ten additional languages require live Gemini. Some interface controls remain English. Show Reading preferences without regenerating or rewriting the current explanation. Prototype coverage is not certified translation coverage. No completed qualified language review is claimed.</aside>
     </section>
 
     <section class="slide" aria-label="Slide 8 of 11: Gemini processing">
@@ -203,14 +204,14 @@
       </div>
       <p class="quiet" style="margin-top:30px">Observed latency describes a request. It does not establish a benchmark.</p>
       <div class="footer"><span>No measured patient outcomes or clinical validation</span><span>10</span></div>
-      <aside class="notes">Report only tests and live requests actually observed for the recorded build. Earlier checks do not certify the later document integration. The prior 1,594 ms Flash-Lite response was one observation. Prepared fixture output must never be narrated as fresh Gemini generation. No accounts, durable clinical approvals, real records, or EHR connections are implemented.</aside>
+      <aside class="notes">Report only tests and live requests actually observed for the recorded build. Use docs/submission-release.md for the final release checks. The prior 1,594 ms Flash-Lite response was one observation. Prepared fixture output must never be narrated as fresh Gemini generation. No accounts, durable clinical approvals, real records, or EHR connections are implemented.</aside>
     </section>
 
     <section class="slide dark" aria-label="Slide 11 of 11: Open source and next review">
       <p class="eyebrow">Open source and next review</p>
       <h2>The source stays central<br>to the conversation</h2>
       <p class="lede">Review with interpreters and research coordinators.<br>Document missed errors and confusing wording.</p>
-      <p class="quiet" style="margin-top:28px">MIT-licensed source, setup instructions, and AI-assistance disclosure</p>
+      <p class="quiet" style="margin-top:28px">MIT source · Reproducible setup · Gemini and Codex assistance disclosed</p>
       <div class="spacer"></div>
       <div class="footer"><a href="https://github.com/SonicGoodmorning/omni-bridge-hackru-2026">github.com/SonicGoodmorning/omni-bridge-hackru-2026</a><span>11</span></div>
       <aside class="notes">The repository is public. Early planning used Gemini 3.1 Pro, and Codex assisted implementation, tests, debugging, deployment work, documentation, and presentation drafts. Human owners must review the result. Build-period eligibility and AI-use rules require truthful provenance and organizer confirmation where needed. Sponsor judging guidance: https://docs.google.com/document/d/15uxWxH70wIqqCJw9W6IX4BHoVz4rDBDuj6FSb5GublI/edit . Roughly three minutes and 10–12 slides are suggestions.</aside>

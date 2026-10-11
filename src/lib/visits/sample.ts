@@ -1,12 +1,12 @@
 import { BridgeServiceError } from "../bridge/errors";
-import type { Locale } from "../types";
+import { hasPreparedSamples, type SampleLocale } from "../types";
 import type { VisitRequest, VisitResult, VisitSpeaker } from "./types";
 
 export interface SampleVisitTurn {
   id: string;
   speaker: VisitSpeaker;
   english: string;
-  text: Record<Locale, string>;
+  text: Record<Exclude<SampleLocale, "en-US">, string>;
 }
 
 // Prepared fictional examples, not generated translations or clinical guidance.
@@ -107,16 +107,20 @@ function normalized(text: string) {
     .replace(/\s+/g, " ").trim();
 }
 
+export function sampleTurnText(turn: SampleVisitTurn, locale: SampleLocale) { return locale === "en-US" ? turn.english : turn.text[locale]; }
+
 export function sampleVisit(request: VisitRequest, elapsedMs = 0): VisitResult {
+  const locale = request.locale;
+  if (!hasPreparedSamples(locale)) throw new BridgeServiceError("SAMPLE_LANGUAGE_UNAVAILABLE", "This language needs Gemini live. Prepared samples are available in English, Spanish, Mandarin, Hindi, Portuguese and Turkish.", 422, false);
   const turn = SAMPLE_VISIT.find((item) => item.speaker === request.speaker
-    && normalized(request.text) === normalized(request.speaker === "clinician" ? item.english : item.text[request.locale]));
+    && normalized(request.text) === normalized(request.speaker === "clinician" ? item.english : sampleTurnText(item, locale)));
   if (!turn) throw new BridgeServiceError("SAMPLE_TEXT_UNAVAILABLE", "Sample mode translates only the prepared visit turns. Choose a sample turn or explicitly select Live mode for your own conversation.", 422, false);
   const participant = request.speaker === "participant";
-  const sourceText = participant ? turn.text[request.locale] : turn.english;
+  const sourceText = participant ? sampleTurnText(turn, locale) : turn.english;
   return {
     requestId: request.requestId, locale: request.locale, engine: "sample", speaker: request.speaker,
     sourceText, sourceLanguage: participant ? request.locale : "en-US", targetLanguage: participant ? "en-US" : request.locale,
-    translation: participant ? turn.english : turn.text[request.locale], reverseTranslation: sourceText,
+    translation: participant ? turn.english : sampleTurnText(turn, locale), reverseTranslation: sourceText,
     flags: [
       { code: "SAMPLE_FIXTURE", severity: "info", message: "Prepared fictional visit example. Both directions are fixtures, not live AI or a blind translation check." },
       { code: "REVIEW_AID", severity: "info", message: "Review both speakers' meaning before sharing. A reverse translation does not establish translation accuracy." },

@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { BridgeTransport, ModelRequest, ModelResponse } from "../src/lib/bridge/engine";
 import { BridgeServiceError } from "../src/lib/bridge/errors";
-import { LOCALES } from "../src/lib/types";
+import { SAMPLE_LOCALES } from "../src/lib/types";
 import { executeVisit } from "../src/lib/visits/engine";
 import { reviewVisit } from "../src/lib/visits/review";
-import { SAMPLE_VISIT } from "../src/lib/visits/sample";
+import { SAMPLE_VISIT, sampleTurnText } from "../src/lib/visits/sample";
 import { visitRequestSchema, visitResultSchema, type VisitRequest } from "../src/lib/visits/types";
 
 const request: VisitRequest = { requestId: "visit-1", locale: "tr-TR", engine: "live", speaker: "clinician", text: "There are 4 visits over 8 weeks. Each visit lasts about 60 minutes." };
@@ -45,7 +45,7 @@ async function expectCode(run: () => Promise<unknown>, code: string, status: num
 test("visit requests validate speaker, language, strict fields and reviewed input length before model calls", async () => {
   assert.equal(visitRequestSchema.safeParse(request).success, true);
   for (const invalid of [
-    { ...request, speaker: "doctor" }, { ...request, locale: "en-US" }, { ...request, text: " " },
+    { ...request, speaker: "doctor" }, { ...request, locale: "xx-XX" }, { ...request, text: " " },
     { ...request, text: "x".repeat(4_001) }, { ...request, requestId: "bad request id" },
     { ...request, apiKey: "not allowed" }, { ...request, history: [] },
   ]) {
@@ -56,20 +56,20 @@ test("visit requests validate speaker, language, strict fields and reviewed inpu
   }
 });
 
-test("all eight prepared visit turns translate in both directions in all five languages without an AI call", async () => {
+test("all eight prepared visit turns translate in both directions in all six sample languages without an AI call", async () => {
   assert.equal(SAMPLE_VISIT.length, 8);
   assert.equal(SAMPLE_VISIT.filter((turn) => turn.speaker === "participant").length, 4);
   const fake = fakeTransport([]);
-  for (const locale of LOCALES) {
+  for (const locale of SAMPLE_LOCALES) {
     for (const turn of SAMPLE_VISIT) {
       const participant = turn.speaker === "participant";
-      const source = participant ? turn.text[locale] : turn.english;
-      if (participant) assert.notEqual(source, turn.english);
+      const source = participant ? sampleTurnText(turn, locale) : turn.english;
+      if (participant && locale !== "en-US") assert.notEqual(source, turn.english);
       const result = await executeVisit({ ...request, locale, engine: "sample", speaker: turn.speaker, text: source }, { transport: fake.transport });
       assert.equal(result.sourceText, source);
       assert.equal(result.sourceLanguage, participant ? locale : "en-US");
       assert.equal(result.targetLanguage, participant ? "en-US" : locale);
-      assert.equal(result.translation, participant ? turn.english : turn.text[locale]);
+      assert.equal(result.translation, participant ? turn.english : sampleTurnText(turn, locale));
       assert.equal(result.reverseTranslation, source);
       assert.equal(result.engine, "sample");
       assert.equal(result.canRelease, true);
@@ -94,7 +94,7 @@ test("clinician live path uses two fresh stateless calls with a blind reverse in
   const fake = fakeTransport(outputs());
   const result = await executeVisit(request, { transport: fake.transport, model: "configured-model" });
   assert.equal(result.canRelease, true);
-  assert.deepEqual(JSON.parse(fake.calls[0].input), { sourceLanguage: "en-US", targetLanguage: "tr-TR", text: request.text });
+  assert.deepEqual(JSON.parse(fake.calls[0].input), { operation: "faithful-interpretation", speaker: "clinician", sourceLanguage: "en-US", targetLanguage: "tr-TR", text: request.text });
   assert.deepEqual(JSON.parse(fake.calls[1].input), { sourceLanguage: "tr-TR", targetLanguage: "en-US", text: native });
   assert.equal(fake.calls[1].input.includes(request.text), false);
   assert.equal(fake.calls[1].system_instruction.includes(request.text), false);
@@ -118,7 +118,7 @@ test("participant live path renders native questions into English and reverses o
   assert.equal(result.sourceLanguage, "tr-TR");
   assert.equal(result.targetLanguage, "en-US");
   assert.equal(result.canRelease, true);
-  assert.deepEqual(JSON.parse(fake.calls[0].input), { sourceLanguage: "tr-TR", targetLanguage: "en-US", text });
+  assert.deepEqual(JSON.parse(fake.calls[0].input), { operation: "faithful-interpretation", speaker: "participant", sourceLanguage: "tr-TR", targetLanguage: "en-US", text });
   assert.deepEqual(JSON.parse(fake.calls[1].input), { sourceLanguage: "en-US", targetLanguage: "tr-TR", text: translation });
   assert.equal(fake.calls[1].input.includes(text), false);
 });

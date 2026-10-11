@@ -8,9 +8,9 @@ const englishNumberWords: Record<string, string> = {
 };
 
 function asciiDigits(text: string) {
-  return text.normalize("NFKC").replace(/[٠-٩۰-۹०-९]/g, (digit) => {
+  return text.normalize("NFKC").replace(/[٠-٩۰-۹०-९০-৯]/g, (digit) => {
     const code = digit.charCodeAt(0);
-    return String(code >= 0x0966 ? code - 0x0966 : code >= 0x06f0 ? code - 0x06f0 : code - 0x0660);
+    return String(code >= 0x09e6 ? code - 0x09e6 : code >= 0x0966 ? code - 0x0966 : code >= 0x06f0 ? code - 0x06f0 : code - 0x0660);
   });
 }
 
@@ -63,7 +63,7 @@ export function reviewVisit(request: VisitRequest, translation: string, reverseT
   }
   // These checks intentionally avoid claiming to understand native-language meaning.
   // Patient questions are translated as spoken, not compared to a trial document.
-  const hasQuestionMark = /[?？]/.test(request.text);
+  const hasQuestionMark = /[?？؟]/.test(request.text);
   const englishRendering = englishSource ? reverseTranslation : translation;
   if (hasQuestionMark && !/[?？]/.test(englishRendering)) {
     flags.push({ code: "QUESTION_REVIEW", severity: "warning", message: "The source appears to ask a question. Check that the English rendering remains a question and does not answer it." });

@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { patientContextSchema, type PatientContext } from "../patient/profile";
 import { LOCALES, type Engine, type Locale, type ReviewFlag } from "../types";
 import { resolveDocumentSource } from "./source";
 
 export type DocumentInput = { kind: "fixture"; id: "visit-summary" } | { kind: "paste"; text: string; acknowledged: true };
-export interface DocumentRequest { requestId: string; locale: Locale; engine: Engine; source: DocumentInput }
+export interface DocumentRequest { requestId: string; locale: Locale; engine: Engine; source: DocumentInput; patientContext?: PatientContext }
 export interface DocumentParagraph { id: string; title: string; text: string }
 export interface DocumentSource { id: string; revision: string; title: string; provenance: "fictional-fixture" | "synthetic-paste"; paragraphs: DocumentParagraph[] }
 export interface DocumentBlock { id: string; sourceParagraphIds: string[]; translation: string; backTranslation: string }
@@ -18,7 +19,7 @@ export const documentInputSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("paste"), text: z.string().trim().min(1).max(4_000), acknowledged: z.literal(true) }).strict(),
 ]);
 export const documentRequestSchema = z.object({
-  requestId: identifier, locale: z.enum(LOCALES), engine: z.enum(["live", "sample"]), source: documentInputSchema,
+  requestId: identifier, locale: z.enum(LOCALES), engine: z.enum(["live", "sample"]), source: documentInputSchema, patientContext: patientContextSchema.optional(),
 }).strict();
 export const documentSourceSchema = z.object({
   id: identifier, revision: identifier, title: z.string().min(1).max(200),

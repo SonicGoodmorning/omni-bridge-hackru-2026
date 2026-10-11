@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { LOCALES } from "./types";
+import { patientProfileSchema } from "./patient/profile";
+import { savedPlanSchema } from "./action-plan/storage";
 
 export const CONVERSATION_STORAGE_KEY = "omnibridge.conversation.v1";
 export const MAX_SAVED_BYTES = 2_000_000;
@@ -40,16 +42,26 @@ export function serializeConversation(saved: SavedConversation): string {
   return raw;
 }
 
-export const HISTORY_STORAGE_KEY = "omnibridge.conversations.v2";
+export const LEGACY_HISTORY_STORAGE_KEY = "omnibridge.conversations.v2";
+export const HISTORY_STORAGE_KEY = "omnibridge.visits.v3";
 export const conversationEntrySchema = z.object({
   id: z.string().min(1).max(200),
   title: z.string().trim().min(1).max(80),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   conversation: savedConversationSchema,
-}).strict();
+  patientId: z.string().min(1).max(100).nullable().default(null),
+  patient: patientProfileSchema.nullable().default(null),
+  plan: savedPlanSchema.nullable().default(null),
+}).strict().superRefine((entry, context) => {
+  if (entry.patient && entry.patient.recordId !== entry.patientId) context.addIssue({ code: "custom", message: "Patient snapshot does not match visit" });
+  if (entry.plan && (!entry.patient || entry.plan.result.locale !== entry.conversation.locale ||
+    JSON.stringify(entry.plan.result.sourceTurnIds) !== JSON.stringify(entry.conversation.turns.map((turn) => turn.id)))) {
+    context.addIssue({ code: "custom", message: "Plan does not match visit source" });
+  }
+});
 export const conversationLibrarySchema = z.object({
-  version: z.literal(2),
+  version: z.literal(3),
   activeId: z.string().nullable(),
   conversations: z.array(conversationEntrySchema).max(100),
 }).strict().superRefine((library, context) => {
@@ -60,10 +72,13 @@ export const conversationLibrarySchema = z.object({
 });
 export type ConversationEntry = z.infer<typeof conversationEntrySchema>;
 export type ConversationLibrary = z.infer<typeof conversationLibrarySchema>;
-export function emptyConversationLibrary(): ConversationLibrary { return { version: 2, activeId: null, conversations: [] }; }
+export function emptyConversationLibrary(): ConversationLibrary { return { version: 3, activeId: null, conversations: [] }; }
 export function parseConversationLibrary(raw: string): ConversationLibrary {
   if (raw.length > MAX_SAVED_BYTES) throw new Error("Conversation history is too large");
-  return conversationLibrarySchema.parse(JSON.parse(raw));
+  const value = JSON.parse(raw);
+  // v2 records have no known patient. Never infer ownership from the active profile.
+  if (value?.version === 2) value.version = 3;
+  return conversationLibrarySchema.parse(value);
 }
 export function serializeConversationLibrary(library: ConversationLibrary): string {
   const raw = JSON.stringify(conversationLibrarySchema.parse(library));
@@ -71,5 +86,5 @@ export function serializeConversationLibrary(library: ConversationLibrary): stri
   return raw;
 }
 export function migrateConversation(saved: SavedConversation, id: string, now: string): ConversationLibrary {
-  return { version: 2, activeId: id, conversations: [{ id, title: "Previous conversation", createdAt: now, updatedAt: now, conversation: saved }] };
+  return { version: 3, activeId: id, conversations: [{ id, title: "Previous conversation", createdAt: now, updatedAt: now, conversation: saved, patientId: null, patient: null, plan: null }] };
 }

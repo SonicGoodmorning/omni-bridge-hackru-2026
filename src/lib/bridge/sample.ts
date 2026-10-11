@@ -1,10 +1,10 @@
 import { SAMPLE_CONVERSATION, SECTIONS, STUDY } from "../study";
-import type { BridgeRequest, BridgeResult, Locale } from "../types";
+import { hasPreparedSamples, type BridgeRequest, type BridgeResult, type SampleLocale } from "../types";
 import { BridgeServiceError } from "./errors";
 
 // Written demonstration fixtures, never a fallback presented as a live AI answer.
 // Their English renderings are fixtures too; no independent model call occurs.
-const translations: Record<Locale, Record<string, string>> = {
+const translations: Record<Exclude<SampleLocale, "en-US">, Record<string, string>> = {
   "tr-TR": {
     purpose: "CLEAR, gerçek olmayan bir araştırma örneğidir. Araştırmada denenen bir tablet ile plasebo karşılaştırılır. Plasebo aynı görünür, ancak etkin araştırma ilacı içermez. Denenen tabletin işe yaradığı henüz gösterilmemiştir. Araştırma, normal tıbbi bakımdan farklıdır. Katılmanız sağlığınıza yarar sağlayacağını garanti etmez.",
     randomization: "Katılırsanız, bir bilgisayar sizi rastgele iki gruptan birine atar: denenen tablet grubu veya plasebo grubu. Her gruba atanma olasılığınız %50’dir. Grubu ne siz ne de araştırmacı seçer. Size etkin araştırma ilacı içermeyen bir plasebo verilebilir. Denenen tabletin size yardımcı olacağı garanti değildir.",
@@ -47,7 +47,16 @@ const translations: Record<Locale, Record<string, string>> = {
   },
 };
 
-const conversationTranslations: Record<Locale, string> = {
+const englishExplanations: Record<string, string> = {
+  purpose: "CLEAR is a made-up research study. It compares a tablet being tested with a placebo. A placebo looks the same but has no active study drug. The tested tablet has not been shown to work. Research is different from regular medical care. Joining does not guarantee a health benefit.",
+  randomization: "If you join, a computer chooses your group by chance: the tested tablet or the placebo. You have a 50% chance of each group. Neither you nor the researcher chooses. You may get a placebo, which has no active study drug. The tested tablet is not guaranteed to help you.",
+  procedures: "Taking part means 4 study visits over 8 weeks. Each visit takes about 60 minutes. The team asks about your experience at each visit. At the first and last visits, the team collects 5 mL of blood. These are made-up research procedures, not instructions for your medical care.",
+  risks: "The tested tablet may cause nausea (feeling sick to your stomach), headache, or other side effects. Some risks are not yet known. Taking blood may briefly hurt or cause bruising. The team cannot promise that you will have no side effects. Talk with the study team about questions or concerns. This document does not give personal medical advice.",
+  voluntary: "Joining is your choice. You can choose not to join. Your choice will not affect your regular care or benefits you are entitled to. You can ask questions and take time to talk with people you trust. This education tool does not ask you to sign or give consent.",
+  withdrawal: "You can stop taking part at any time without a penalty or losing benefits you are entitled to. Tell the team if you want to leave so they can discuss any final study procedures. Leaving will not affect your regular care. Ask what happens to information already collected; this made-up document does not say.",
+};
+
+const conversationTranslations: Record<Exclude<SampleLocale, "en-US">, string> = {
   "tr-TR": "İki gruptan her birine atanma olasılığınız %50’dir. Grubu ne siz ne de araştırmacı seçer. Size etkin araştırma ilacı içermeyen bir plasebo verilebilir.",
   "es-419": "Tiene un 50% de probabilidad de quedar en cada grupo. Ni usted ni el investigador eligen el grupo. Puede recibir un placebo, que no contiene medicamento activo del estudio.",
   "pt-BR": "Você tem 50% de chance de entrar em cada grupo. Nem você nem o pesquisador escolhem o grupo. Você pode receber um placebo, que não contém medicamento ativo do estudo.",
@@ -60,6 +69,8 @@ export function normalizeSampleText(value: string) {
 }
 
 export function sampleBridge(request: BridgeRequest, elapsedMs: number): BridgeResult {
+  const locale = request.locale;
+  if (!hasPreparedSamples(locale)) throw new BridgeServiceError("SAMPLE_LANGUAGE_UNAVAILABLE", "This language needs Gemini live; no prepared translation is available.", 422, false);
   const section = SECTIONS.find((item) => item.id === request.sectionId);
   if (request.mode === "conversation" && normalizeSampleText(request.text ?? "") !== normalizeSampleText(SAMPLE_CONVERSATION)) {
     throw new BridgeServiceError("SAMPLE_TEXT_UNAVAILABLE", "Sample mode contains one prewritten conversation. Load the sample conversation or enable the live engine to translate your own text.", 422, false);
@@ -76,7 +87,7 @@ export function sampleBridge(request: BridgeRequest, elapsedMs: number): BridgeR
     studyVersion: STUDY.version,
     sourceText,
     sourceSectionIds: request.mode === "consent" ? [section!.id] : ["randomization"],
-    translation: request.mode === "consent" ? translations[request.locale][section!.id] : conversationTranslations[request.locale],
+    translation: request.mode === "consent" ? (locale === "en-US" ? englishExplanations[section!.id] : translations[locale][section!.id]) : (locale === "en-US" ? "You have a 50% chance of being in each group. Neither you nor the researcher chooses your group. You may get a placebo: a tablet with no active study drug." : conversationTranslations[locale]),
     backTranslation: request.mode === "consent" ? section!.body : SAMPLE_CONVERSATION,
     flags: [
       { code: "SAMPLE_FIXTURE", severity: "info", message: "Prewritten sample translation and English rendering. No live AI or blind rendering call was made." },

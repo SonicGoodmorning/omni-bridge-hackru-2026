@@ -1,9 +1,10 @@
 import { BridgeServiceError } from "../bridge/errors";
-import type { Locale } from "../types";
+import { hasPreparedSamples, type SampleLocale } from "../types";
 import type { DocumentRequest, DocumentResult, DocumentSource } from "./types";
 import { reviewDocument } from "./review";
 
-const translations: Record<Locale, [string, string, string]> = {
+const translations: Record<SampleLocale, [string, string, string]> = {
+  "en-US": ["This is a made-up summary of a follow-up clinic visit, not a real medical record.", "The made-up note records high blood pressure without symptoms. The recorded blood pressure is 148/94 mmHg.", "The made-up clinician’s recorded plan lists 10 mg lisinopril daily. The note says not to stop it without contacting the clinic. It also lists a blood test in 2 weeks and a follow-up visit in 4 weeks."],
   "tr-TR": [
     "Bu, ayakta takip ziyareti için hazırlanmış kurgusal bir özettir. Bir gösterimdir, gerçek bir kayıt değildir.",
     "Kurgusal not, belirti olmadan yüksek tansiyon kaydedildiğini söylüyor. Kaydedilen kan basıncı 148/94 mmHg.",
@@ -32,8 +33,10 @@ const translations: Record<Locale, [string, string, string]> = {
 };
 
 export function sampleDocument(request: DocumentRequest, source: DocumentSource, elapsedMs: number): DocumentResult {
+  const locale = request.locale;
+  if (!hasPreparedSamples(locale)) throw new BridgeServiceError("SAMPLE_LANGUAGE_UNAVAILABLE", "This language needs Gemini live; no prepared document translation is available.", 422, false);
   if (request.source.kind !== "fixture") throw new BridgeServiceError("SAMPLE_TEXT_UNAVAILABLE", "Sample mode explains the two fixed fictional documents. Choose Live Gemini for your pasted synthetic text.", 422, false);
-  const blocks = source.paragraphs.map((paragraph, i) => ({ id: paragraph.id, sourceParagraphIds: [paragraph.id], translation: translations[request.locale][i], backTranslation: paragraph.text }));
+  const blocks = source.paragraphs.map((paragraph, i) => ({ id: paragraph.id, sourceParagraphIds: [paragraph.id], translation: translations[locale][i], backTranslation: paragraph.text }));
   return {
     requestId: request.requestId, locale: request.locale, engine: "sample", source, blocks,
     flags: [{ code: "SAMPLE_FIXTURE", severity: "info", message: "Prepared fictional example. No live AI was called; its English rendering is a fixture, not an independent verification." }, ...reviewDocument(request, source, blocks)],

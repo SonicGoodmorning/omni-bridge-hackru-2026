@@ -1,7 +1,7 @@
 import type { BridgeTransport, ModelRequest, ModelResponse } from "../bridge/engine";
 import { BridgeServiceError } from "../bridge/errors";
 import type { ReviewFlag } from "../types";
-import { VISIT_REVERSE_POLICY, VISIT_TRANSLATION_POLICY, visitBlindInput, visitGenerationInput } from "./prompts";
+import { JARGON_EXPLANATION_POLICY, VISIT_REVERSE_POLICY, VISIT_TRANSLATION_POLICY, visitBlindInput, visitGenerationInput } from "./prompts";
 import { reviewVisit } from "./review";
 import { sampleVisit } from "./sample";
 import { visitRequestSchema, visitResultSchema, visitReverseJsonSchema, visitReverseSchema, visitTranslationJsonSchema, visitTranslationSchema, type VisitResult } from "./types";
@@ -12,6 +12,8 @@ export interface VisitOptions {
   deadlineMs?: number;
   model?: string;
   now?: () => number;
+  /** Server-selected purpose; never accepted from the conversation API payload. */
+  purpose?: "jargon";
 }
 
 function parseModel(response: ModelResponse): unknown {
@@ -71,12 +73,15 @@ export async function executeVisit(input: unknown, options: VisitOptions = {}): 
   };
 
   try {
-    const first = visitTranslationSchema.safeParse(parseModel(await call(VISIT_TRANSLATION_POLICY, visitGenerationInput(request), visitTranslationJsonSchema)));
+    const first = visitTranslationSchema.safeParse(parseModel(await call(options.purpose === "jargon" ? JARGON_EXPLANATION_POLICY : VISIT_TRANSLATION_POLICY, visitGenerationInput(request), visitTranslationJsonSchema)));
     if (!first.success) throw new BridgeServiceError("INVALID_MODEL_OUTPUT", "The translation did not match the required format. Nothing new was shared. Please retry.", 502, true);
     const second = visitReverseSchema.safeParse(parseModel(await call(VISIT_REVERSE_POLICY, visitBlindInput(request, first.data.translation), visitReverseJsonSchema)));
     if (!second.success) throw new BridgeServiceError("INVALID_MODEL_OUTPUT", "The reverse translation did not match the required format. Nothing new was shared. Please retry.", 502, true);
     const flags: ReviewFlag[] = first.data.concerns.map((concern) => ({ ...concern, severity: "warning" }));
-    flags.push(...reviewVisit(request, first.data.translation, second.data.reverseTranslation));
+    if (request.speaker === "clinician" && request.patientContext && options.purpose !== "jargon") flags.push({ code: "PATIENT_CONTEXT", severity: "info", message: "Self-reported patient context was supplied. Check any familiar example against the original and the patient’s stated restrictions. Examples do not change clinical instructions." });
+    const review = reviewVisit(request, first.data.translation, second.data.reverseTranslation);
+    flags.push(...review.filter((flag) => options.purpose !== "jargon" || !["QUESTION_REVIEW", "REVIEW_AID"].includes(flag.code)));
+    if (options.purpose === "jargon") flags.push({ code: "GENERAL_EXPLANATION", severity: "info", message: "General AI-generated explanation, not a clinician message or personal medical advice. The independent English rendering helps review wording; it does not verify medical accuracy." });
     return visitResultSchema.parse({
       requestId: request.requestId, locale: request.locale, engine: "live", speaker: request.speaker, sourceText: request.text,
       sourceLanguage: request.speaker === "clinician" ? "en-US" : request.locale,

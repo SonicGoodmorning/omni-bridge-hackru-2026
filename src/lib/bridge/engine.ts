@@ -110,6 +110,7 @@ export async function executeBridge(input: unknown, options: BridgeOptions = {})
     const second = backTranslationSchema.safeParse(parseModel(await call(BACK_TRANSLATION_POLICY, blindRenderingInput(request.locale, translation.translation), backTranslationJsonSchema)));
     if (!second.success) throw new BridgeServiceError("INVALID_MODEL_OUTPUT", "The English rendering did not match the required format. Nothing new was released. Please retry.", 502, true);
     const flags: ReviewFlag[] = translation.concerns.map((concern) => ({ ...concern, severity: concern.code === "SOURCE_CONTRADICTION" ? "blocking" : "warning" }));
+    if (request.patientContext) flags.push({ code: "PATIENT_CONTEXT", severity: "info", message: "Self-reported patient context was supplied. Check any familiar example against the original and the patient’s stated restrictions. Examples do not change clinical instructions." });
     flags.push(...reviewFacts(sourceText, second.data.backTranslation));
     if (request.mode === "conversation" && translation.sourceSectionIds.length === 0 && !flags.some((flag) => flag.code === "OUT_OF_SOURCE")) {
       flags.push({ code: "OUT_OF_SOURCE", severity: "warning", message: "No fixed study section supports this conversation. Review the source and ask the study team to clarify." });

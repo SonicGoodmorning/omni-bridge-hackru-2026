@@ -76,6 +76,7 @@ export async function executeDocument(input: unknown, options: DocumentOptions =
       ...first.data.concerns.map((concern) => ({ ...concern, severity: "warning" as const })),
       ...reviewDocument(request, source, blocks),
     ];
+    if (request.patientContext) flags.push({ code: "PATIENT_CONTEXT", severity: "info", message: "Self-reported patient context was supplied. Review familiar examples against the source and the patient’s restrictions." });
     const result = documentResultSchema.safeParse({
       requestId: request.requestId, locale: request.locale, engine: "live", source, blocks, flags,
       elapsedMs: Math.max(0, now() - started), canRelease: !flags.some((flag) => flag.severity === "blocking"),

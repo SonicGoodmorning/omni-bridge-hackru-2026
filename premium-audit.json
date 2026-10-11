@@ -1,0 +1,50 @@
+{
+  "findings": [
+    {
+      "category": "violation",
+      "file": "src/components/jargon-workspace.tsx",
+      "line": 31,
+      "message": "Application-owned form does not declare its validation owner.",
+      "remediation": "Add noValidate/novalidate and implement the canonical validation contract.",
+      "ruleId": "form.novalidate-missing",
+      "severity": "error"
+    },
+    {
+      "category": "violation",
+      "file": "src/components/numbers-workspace.tsx",
+      "line": 44,
+      "message": "Application-owned form does not declare its validation owner.",
+      "remediation": "Add noValidate/novalidate and implement the canonical validation contract.",
+      "ruleId": "form.novalidate-missing",
+      "severity": "error"
+    },
+    {
+      "category": "violation",
+      "file": "src/components/patient-profile.tsx",
+      "line": 55,
+      "message": "Application-owned form does not declare its validation owner.",
+      "remediation": "Add noValidate/novalidate and implement the canonical validation contract.",
+      "ruleId": "form.novalidate-missing",
+      "severity": "error"
+    },
+    {
+      "category": "violation",
+      "file": "src/components/saved-conversations.tsx",
+      "line": 62,
+      "message": "Application-owned form does not declare its validation owner.",
+      "remediation": "Add noValidate/novalidate and implement the canonical validation contract.",
+      "ruleId": "form.novalidate-missing",
+      "severity": "error"
+    }
+  ],
+  "mode": "strict",
+  "projectRoot": "/Users/egegunaydin/Documents/ChatGPT/Project-OmniBrdige",
+  "schemaVersion": 1,
+  "summary": {
+    "errors": 4,
+    "total": 4,
+    "unresolved": 0,
+    "violations": 4,
+    "warnings": 0
+  }
+}

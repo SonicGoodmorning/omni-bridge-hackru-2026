@@ -17,7 +17,7 @@ export interface BridgeState {
 
 export function initialBridgeState(liveAvailable: boolean): BridgeState {
   return {
-    mode: "consent", locale: "tr-TR", sectionId: "randomization", text: SAMPLE_CONVERSATION,
+    mode: "consent", locale: "en-US", sectionId: "randomization", text: SAMPLE_CONVERSATION,
     engine: liveAvailable ? "live" : "sample", status: "idle", result: null,
     released: null, error: null, reviewConfirmed: false, activeRequestId: null,
   };

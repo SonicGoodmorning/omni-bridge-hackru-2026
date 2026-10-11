@@ -1,19 +1,21 @@
 # API contracts
 
-The unified UI has **Document guide** and **Conversation**. Its server endpoints remain separate by input contract:
+The unified UI connects **Document guide**, **Conversation**, **Explain jargon**, patient profiles, numbers, visit history and action plans. Its server endpoints remain separate by input contract:
 
 | Endpoint | Responsibility | Runtime validators |
 | --- | --- | --- |
 | `POST /api/bridge` | Fixed CLEAR trial explanation; retained legacy English-only explanation input | `src/lib/bridge/schema.ts` |
 | `POST /api/documents` | Fictional follow-up note or acknowledged synthetic paste | `src/lib/documents/types.ts` |
-| `POST /api/visits` | Faithful translation of one human turn in either direction | `src/lib/visits/types.ts` |
+| `POST /api/visits` | Faithful interpretation of one human turn; plain-English clinician wording when English is selected | `src/lib/visits/types.ts` |
+| `POST /api/explain` | General medical vocabulary explanation; no patient profile or transcript mutation | Strict subset of `visitRequestSchema`; `visitResultSchema` output |
 
 All requests are same-origin JSON. Unknown fields and unsupported locales fail validation. Responses include `Cache-Control: no-store`. There is no public authentication or clinical authorization system; the hosted Preview is access-protected for a controlled synthetic-data demonstration.
 
 ## Shared fields and limits
 
 ```ts
-type Locale = "tr-TR" | "es-419" | "pt-BR" | "hi-IN" | "zh-CN";
+type Locale = "en-US" | "es-419" | "zh-CN" | "hi-IN" | "ar-SA" | "fr-FR" | "pt-BR" | "bn-BD"
+  | "ru-RU" | "ur-PK" | "id-ID" | "de-DE" | "ja-JP" | "ko-KR" | "vi-VN" | "tr-TR";
 type Engine = "live" | "sample";
 interface ReviewFlag {
   code: string;
@@ -25,7 +27,7 @@ interface ReviewFlag {
 
 A request ID must contain 1–100 ASCII letters, digits, underscores, or hyphens. Bridge/Visits trim it first; Documents requires an already-clean ID. Generate a new ID for each request. Source/turn text is trimmed and must contain 1–4,000 characters where text input applies. The UI also limits its editable text and requires deliberate shortening of an overlong speech transcript.
 
-Routes reject declared content lengths above 24,000 bytes. Documents and Visits also measure the decoded body's UTF-8 byte length against 24,000; the retained Bridge route checks its decoded character length. Do not use the body cap as the source-text cap.
+Bridge, Documents and Visits reject declared and measured UTF-8 request bodies above 64,000 bytes. Explain jargon uses a 32,000-byte limit; Action plan uses its separate transcript/body limits below. Do not use the body cap as the source-text cap.
 
 Every successful result stays a draft. `canRelease` indicates mechanical eligibility, not translation quality, clinical approval, human review, or completed sharing. Blocking flags prevent release. The client must validate the schema and current request/source/locale/engine/direction, inspect the output, and explicitly share. Edits invalidate affected review state.
 
@@ -166,3 +168,25 @@ Display the safe message and leave sharing disabled. Retry eligibility does not 
 Each complete operation uses two stateless Gemini calls with `store: false` under one 45-second overall budget. Route duration is configured to 60 seconds, with a 46-second client deadline. The server key and configurable model ID stay server-side; the current default and Preview setting use `gemini-3.5-flash-lite`.
 
 The fresh reverse request receives only generated text, required identifiers, and language direction, without original source or history. Both calls use the same model and can share an error. Source data, including instructions in pasted text, must not override the model's task. Schema validation and flags do not establish medical or linguistic validity.
+
+## Patient context and action plans
+
+The existing bridge, documents and visits request schemas accept an optional `patientContext`. It contains bounded self-reported age group, individually chosen familiar foods, food access, cooking, work schedule, activity, diet/preferences/restrictions, helpful examples or topics to avoid, conditions, medicines, allergies, communication needs, routine, support needs, and the chosen-example toggle. The browser sends it only after the patient enables AI context. Display nickname, pronouns, stored preferred language, exact age, sex, height, weight, location, identity/background fields, profile/sample IDs and logged numbers are excluded; the request locale remains authoritative. Legacy `culturalBackground` and `region` request fields are accepted for compatibility but stripped during validation before any Gemini request. Sample engines do not personalize prepared text.
+
+`POST /api/action-plan` accepts `{requestId, locale, turns, patientContext?}`. `turns` are the existing shared conversation turn objects, with unique IDs and speaker/language direction matching the locale. Limits: 1–100 turns, 4,000 source characters per turn, 100,000 combined source/translation characters, and a 500,000-byte request body. A clinician turn is required. Exceeding a limit fails explicitly without truncation.
+
+The server always uses live Gemini. It sends every clinician original and every participant original/English rendering; clinician translations and cultural examples do not become prescription evidence. A second independent call receives only patient-language action/timing/clarification text and questions. Compact model schemas avoid upstream schema-complexity rejection; complete Zod schemas still validate returned values on the server.
+
+The result includes `actions`, bilingual `questions`, `sourceTurnIds`, locale, request ID, creation timestamp and elapsed time. Each action has a clinician source ID, verbatim source quote expanded to its containing complete sentences, kind, English/patient wording and timing, recurrence (`daily`, `once`, `as-directed`), clarification fields, medication fields, English reverse renderings, flags and `canCheck`. Non-medication entries have empty medication fields. Unknown medication identity, dose, route or timing blocks a step. Quantity/negation checks, possible medication misclassification and unsupported daily recurrence can also block it. Missing timing never becomes an invented schedule. Any blocked action pauses activation of the whole checklist.
+
+The client requires explicit source review before checklist use. It rejects mismatched responses and invalidates the active plan on transcript/language/context changes. Optional browser persistence stores the reviewed result and completion keys plus a SHA-256 fingerprint of the generating transcript, locale and AI context, rather than another copy of the full profile. Restoration requires that fingerprint to match and requires review again. Source quotes and plan text remain unencrypted local data.
+
+Errors use the existing `{error:{code,message,retryable}}` shape. Missing configuration, quota, cancellation, timeout, invalid output, bad references and incomplete extraction leave the transcript available and never substitute a prepared plan.
+
+## General vocabulary: /api/explain
+
+Send exactly `{ requestId, locale, text }`. Text is an English term, sentence, or meaning question, trimmed to 1–4,000 characters. No engine, speaker, patient context, or conversation is accepted. The route selects live Gemini and its own vocabulary policy on the server. Missing configuration returns 503; invalid input returns 400.
+
+The response uses `VisitResult` (`speaker: "clinician"` is a schema reuse detail, **not clinician authorship**), with `sourceLanguage: "en-US"`, the requested target language, a general `translation` explanation, independent English `reverseTranslation`, and review flags including `GENERAL_EXPLANATION`. It answers general meaning questions; Conversation still preserves a patient's question for a human response. No automatic sharing, transcript saving, plan extraction, or personal diagnosis occurs. Client edits, language changes, new sessions and navigation cancel/invalidate pending answers.
+
+Prepared samples in Bridge/Documents/Visits support only English, Turkish, Spanish, Portuguese, Hindi, and Mandarin. Other valid locales with `engine: "sample"` return `422 SAMPLE_LANGUAGE_UNAVAILABLE`. English clinician interpretation explicitly simplifies jargon; English participant interpretation faithfully preserves questions.

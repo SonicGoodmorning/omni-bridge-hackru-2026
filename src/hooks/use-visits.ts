@@ -1,9 +1,11 @@
 "use client";
 
+import type { PatientContext } from "@/lib/patient/profile";
+
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import type { SavedConversation } from "@/lib/local-conversation";
-import type { Engine, Locale } from "@/lib/types";
-import { SAMPLE_VISIT } from "@/lib/visits/sample";
+import { hasPreparedSamples, type Engine, type Locale } from "@/lib/types";
+import { SAMPLE_VISIT, sampleTurnText } from "@/lib/visits/sample";
 import { visitResultSchema, type VisitRequest, type VisitResult } from "@/lib/visits/types";
 
 export type VisitSpeaker = "clinician" | "participant";
@@ -49,7 +51,7 @@ type Action =
 const clearReview = { status: "idle" as const, result: null, error: null, activeRequestId: null, activeSpeaker: null, reviewConfirmed: false };
 const emptyDrafts = () => ({ clinician: "", participant: "" });
 function initialState(liveAvailable: boolean): VisitState {
-  return { locale: "tr-TR", engine: liveAvailable ? "live" : "sample", drafts: emptyDrafts(), ...clearReview, turns: [], sampleCursor: 0 };
+  return { locale: "en-US", engine: liveAvailable ? "live" : "sample", drafts: emptyDrafts(), ...clearReview, turns: [], sampleCursor: 0 };
 }
 
 function reducer(state: VisitState, action: Action): VisitState {
@@ -71,18 +73,20 @@ function reducer(state: VisitState, action: Action): VisitState {
     case "restore": return { ...state, ...clearReview, locale: action.saved.locale, engine: action.saved.engine, drafts: emptyDrafts(), turns: action.saved.turns, sampleCursor: 0 };
     case "reset": return { ...state, ...clearReview, drafts: emptyDrafts(), turns: [], sampleCursor: 0 };
     case "next-sample": {
+      if (!hasPreparedSamples(state.locale)) return state;
       const turn = SAMPLE_VISIT[state.sampleCursor % SAMPLE_VISIT.length];
-      return { ...state, ...clearReview, engine: "sample", turns: state.engine === "sample" ? state.turns : [], drafts: { ...(state.engine === "sample" ? state.drafts : emptyDrafts()), [turn.speaker]: turn.speaker === "clinician" ? turn.english : turn.text[state.locale] }, sampleCursor: state.sampleCursor + 1 };
+      return { ...state, ...clearReview, engine: "sample", turns: state.engine === "sample" ? state.turns : [], drafts: { ...(state.engine === "sample" ? state.drafts : emptyDrafts()), [turn.speaker]: turn.speaker === "clinician" ? turn.english : sampleTurnText(turn, state.locale) }, sampleCursor: state.sampleCursor + 1 };
     }
     case "prepared": return { ...state, ...clearReview, engine: "sample", drafts: emptyDrafts(), turns: action.turns, sampleCursor: 0 };
   }
 }
 
-export function useVisits(liveAvailable: boolean) {
+export function useVisits(liveAvailable: boolean, context?: PatientContext) {
   const [state, dispatch] = useReducer(reducer, liveAvailable, initialState);
   const stateRef = useRef(state);
   stateRef.current = state;
   const controller = useRef<AbortController | null>(null);
+  const contextRef = useRef(context); contextRef.current = context;
   useEffect(() => () => controller.current?.abort(), []);
 
   const invalidate = useCallback((action: Action) => {
@@ -108,7 +112,7 @@ export function useVisits(liveAvailable: boolean) {
     const abort = new AbortController();
     controller.current = abort;
     const requestId = crypto.randomUUID();
-    const payload: VisitRequest = { requestId, locale: current.locale, engine: current.engine, speaker, text };
+    const payload: VisitRequest = { requestId, locale: current.locale, engine: current.engine, speaker, text, patientContext: contextRef.current };
     dispatch({ type: "start", speaker, requestId });
     const timeout = setTimeout(() => abort.abort("deadline"), 46_000);
     try {
@@ -129,7 +133,8 @@ export function useVisits(liveAvailable: boolean) {
 
   const openPrepared = useCallback(() => {
     const locale = stateRef.current.locale;
-    const turns: VisitTurn[] = SAMPLE_VISIT.map((turn) => ({ id: `prepared-${locale}-${turn.id}`, speaker: turn.speaker, sourceText: turn.speaker === "clinician" ? turn.english : turn.text[locale], translation: turn.speaker === "clinician" ? turn.text[locale] : turn.english, sourceLanguage: turn.speaker === "clinician" ? "en-US" : locale, targetLanguage: turn.speaker === "clinician" ? locale : "en-US", engine: "sample", prepared: true }));
+    if (!hasPreparedSamples(locale)) return;
+    const turns: VisitTurn[] = SAMPLE_VISIT.map((turn) => ({ id: `prepared-${locale}-${turn.id}`, speaker: turn.speaker, sourceText: turn.speaker === "clinician" ? turn.english : sampleTurnText(turn, locale), translation: turn.speaker === "clinician" ? sampleTurnText(turn, locale) : turn.english, sourceLanguage: turn.speaker === "clinician" ? "en-US" : locale, targetLanguage: turn.speaker === "clinician" ? locale : "en-US", engine: "sample", prepared: true }));
     invalidate({ type: "prepared", turns });
   }, [invalidate]);
 

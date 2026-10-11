@@ -1,5 +1,7 @@
 "use client";
 
+import type { PatientContext } from "@/lib/patient/profile";
+
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import type { Engine, Locale } from "@/lib/types";
 import { documentResultSchema, matchesDocumentRequest, type DocumentRequest, type DocumentResult } from "@/lib/documents/types";
@@ -29,7 +31,7 @@ type Action =
   | { type: "cancel" };
 
 function initialState(liveAvailable: boolean): DocumentState {
-  return { locale: "tr-TR", engine: liveAvailable ? "live" : "sample", text: "", acknowledged: false, ...cleared };
+  return { locale: "en-US", engine: liveAvailable ? "live" : "sample", text: "", acknowledged: false, ...cleared };
 }
 
 function reducer(state: DocumentState, action: Action): DocumentState {
@@ -47,11 +49,12 @@ function reducer(state: DocumentState, action: Action): DocumentState {
   }
 }
 
-export function useDocuments(liveAvailable: boolean) {
+export function useDocuments(liveAvailable: boolean, context?: PatientContext) {
   const [state, dispatch] = useReducer(reducer, liveAvailable, initialState);
   const stateRef = useRef(state);
   stateRef.current = state;
   const controller = useRef<AbortController | null>(null);
+  const contextRef = useRef(context); contextRef.current = context;
   useEffect(() => () => controller.current?.abort(), []);
 
   const configure = useCallback((patch: Partial<Pick<DocumentState, "locale" | "engine" | "text" | "acknowledged">>) => {
@@ -75,6 +78,7 @@ export function useDocuments(liveAvailable: boolean) {
     const abort = new AbortController();
     controller.current = abort;
     const payload: DocumentRequest = {
+      patientContext: contextRef.current,
       requestId, locale: current.locale, engine: current.engine,
       source: kind === "visit-summary" ? { kind: "fixture", id: "visit-summary" } : { kind: "paste", text: current.text.trim(), acknowledged: true },
     };

@@ -14,7 +14,7 @@ async function translateAndShare(page: Page, speaker: "clinician" | "participant
   await page.getByRole("checkbox", { name: reviewLabel, exact: true }).check();
   await page.getByRole("button", { name: "Share this turn", exact: true }).click();
 }
-test.beforeEach(async ({ page }) => { await page.goto("/"); await page.getByLabel("Explanation engine").selectOption("sample"); });
+test.beforeEach(async ({ page }) => { await page.goto("/"); await page.getByLabel("Explanation engine").selectOption("sample"); await page.getByLabel("Participant preferred language").selectOption("tr-TR"); });
 
 test("home is Conversation, legacy visits redirects, and Documents preserves each speaker draft", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Conversation", exact: true })).toBeVisible();
@@ -62,15 +62,15 @@ test("participant display excludes drafts and English reverse text, supports bot
   expect(requests).toBe(0);
 });
 
-test("prepared sample display renders all five languages and language changes clear it", async ({ page }) => {
-  for (const locale of ["tr-TR", "es-419", "pt-BR", "hi-IN", "zh-CN"] as const) {
+test("prepared sample display renders all six sample languages and language changes clear it", async ({ page }) => {
+  for (const locale of ["en-US", "tr-TR", "es-419", "pt-BR", "hi-IN", "zh-CN"] as const) {
     await page.getByLabel("Participant preferred language").selectOption(locale);
     if (await page.getByRole("button", { name: "Try a sample" }).getAttribute("aria-expanded") !== "true") await page.getByRole("button", { name: "Try a sample" }).click();
     await page.getByRole("button", { name: "Open prepared conversation", exact: true }).click();
     await page.getByRole("button", { name: "Participant display", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "Participant display", exact: true });
     await expect(dialog).toHaveAttribute("lang", locale); await expect(dialog).toContainText("Prepared sample");
-    const last = SAMPLE_VISIT.at(-1)!; await expect(dialog.locator(".display-text")).toHaveText(last.text[locale]);
+    const last = SAMPLE_VISIT.at(-1)!; await expect(dialog.locator(".display-text")).toHaveText(locale === "en-US" ? last.english : last.text[locale]);
     await page.getByLabel("Participant preferred language").selectOption(locale === "tr-TR" ? "es-419" : "tr-TR", { force: true });
     await expect(dialog).toHaveCount(0); await expect(page.getByRole("button", { name: "Participant display", exact: true })).toBeDisabled();
   }

@@ -2,7 +2,9 @@
 
 Use synthetic material and consenting teammates. Mark manual checks only after observation. Automated tests, valid JSON, source links, and reverse rendering do not establish translation quality or clinical fitness.
 
-## Current unified build
+Current submission evidence is in [the release record](submission-release.md). The historical counts and live timings below describe earlier revisions.
+
+## Historical integrated build
 
 | Check | Recorded result | Evidence |
 | --- | --- | --- |
@@ -25,13 +27,13 @@ Before integration, a 40-case unit suite passed. A complete 25-browser run passe
 
 An earlier fresh GitHub clone passed `npm ci`, example-environment setup, type checking, all 25 then-existing unit tests, and production build. The earlier 11-slide deck and its PDF also passed visual review. These records establish those earlier versions only, not the current integration.
 
-## Current live document observation
+## Earlier live document observation
 
 An acknowledged synthetic English paragraph completed the real two-call document path in Turkish: HTTP 200, 2,798 ms wall time, 2,658 ms server time. The returned text retained 4 visits, 8 weeks, voluntary participation, and leaving at any time. Its only flag was the review-aid notice. See [the raw document report](documents-live-qa.json). This one observation is not a benchmark or qualified translation review.
 
-## Recorded connected live journey
+## Earlier recorded connected live journey
 
-The current captioned video contains three HTTP 200 live operations: Turkish trial explanation (1,894 ms server time), participant question into English (1,303 ms), and the human-authored English reply into Turkish (1,597 ms). All produced mechanically releasable results; only review-aid notices were present. The video then explicitly switches to the fictional visit-note sample. [Actual responses](integrated-demo-qa.json) are separate from the mocked browser suite. The capture script operates review controls; this is not qualified human approval or evidence that every wording is accurate.
+The earlier captioned video contained three HTTP 200 live operations: Turkish trial explanation (1,894 ms server time), participant question into English (1,303 ms), and the human-authored English reply into Turkish (1,597 ms). All produced mechanically releasable results; only review-aid notices were present. The video then explicitly switches to the fictional visit-note sample. [Actual responses](integrated-demo-qa.json) are separate from the mocked browser suite. The capture script operates review controls; this is not qualified human approval or evidence that every wording is accurate.
 
 ## Actual earlier live observations
 
